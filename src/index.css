@@ -1,0 +1,307 @@
+/* ===========================================================
+   TAILWIND
+=========================================================== */
+@import "tailwindcss";
+
+/* ===========================================================
+   🌞 LIGHT THEME
+=========================================================== */
+:root {
+  /* Glass */
+  --glass-bg: rgba(255, 255, 255 / 0%);
+  --glass-border: rgba(255, 255, 255, 0.3);
+  --glass-highlight: rgba(255, 255, 255, 0.5);
+  --glass-text: #1f2937;
+
+  /* Page */
+  --page-bg: oklch(0.62 0.14 192.26);
+  --page-bg-rgb: 166, 190, 200;
+  --page-text: #000;
+  --header-text: #111;
+
+  --menu-hover-color: #0b05b5;
+  --dropdown-hover-bg: rgba(14, 165, 233, 0.2);
+
+  /* Section */
+  --section-bg: radial-gradient(
+    ellipse at center,
+    rgba(255, 245, 235, 0.7) 0%,
+    rgba(235, 245, 255, 0.5) 50%,
+    #c8c8c8 100%
+  );
+
+  --section-border: rgba(0,0,0,.08);
+
+  /* Hero */
+  --hero-bg: radial-gradient(
+    ellipse 120% 70% at 50% 45%,
+    oklch(88.874% 0.01306 203.325) 0%,
+    oklch(0.65 0.03 210 / 0.18) 72%,
+    oklch(0.65 0.03 210 / 0) 100%
+  );
+
+  --hero-text: #0d0d0d;
+  --hero-button: #3b82f6;
+  --hero-button-text: #fff;
+
+  /* Special */
+  --special-section-bg:
+    linear-gradient(rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.25)),
+    radial-gradient(
+      ellipse at 30% 20%,
+      oklch(0.95 0.02 240) 0%,
+      oklch(0.90 0.03 240) 20%,
+      oklch(0.67745 0.01657 242.024) 100%
+    );
+
+  /* CATEGORY (legacy) */
+  --category-card-bg: linear-gradient(145deg, #ffffff 0%, #f9faff 100%);
+  --category-card-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+  --category-border: rgba(203, 213, 225, 0.9);
+  --category-text: #111;
+  --category-subtext: #404955;
+  --category-hover-text: #111;
+  --category-hover-gradient-opacity: 0.1;
+  --category-corner-accent: rgba(27, 27, 28, 0.6);
+  --category-corner-accent-hover: rgb(236, 237, 244);
+
+  
+
+  /* Footer */
+  --footer-bg: #f8f9fa;
+  --footer-text: #111827;
+  --footer-subtext: #6b7280;
+  --footer-border: #e5e7eb;
+  --footer-card-bg: #fff;
+  --footer-card-hover-bg: #f1f5f9;
+}
+
+/* ===========================================================
+   🌙 DARK THEME
+=========================================================== */
+.dark {
+  --glass-bg: rgb(31 41 55 / 0%);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-highlight: rgba(255, 255, 255, 0.12);
+  --glass-text: #f9fafb;
+
+  --page-bg: oklch(14.2% 0.068 268);
+  --page-bg-rgb: 11, 15, 63;
+  --page-text: #fff;
+  --header-text: #fff;
+
+  --menu-hover-color: #f687b3;
+  --dropdown-hover-bg: rgba(236, 72, 153, 0.2);
+
+  --section-bg: radial-gradient(
+    circle at 25% 25%,
+    rgba(255, 220, 180, 0.4) 0%,
+    rgba(200, 230, 250, 0.3) 40%,
+    #11142e 100%
+  );
+
+  --hero-bg: radial-gradient(
+    ellipse farthest-side at center,
+    oklch(32% 0.11 260) 0%,
+    oklch(22% 0.095 264.5) 45%,
+    oklch(14.197% 0.06791 267.878) 100%
+  );
+
+  --hero-text: #fff;
+
+  --special-section-bg: radial-gradient(
+    circle at 25% 25%,
+    rgba(65, 187, 244, 0.2) 0%,
+    rgba(119, 182, 231, 0.14) 45%,
+    rgb(52, 73, 128) 100%
+  );
+
+  --category-card-bg: rgba(15, 23, 42, 0.6);
+  --category-card-shadow: 0 18px 40px rgba(0,0,0,.55);
+  --category-border: rgba(75, 85, 99, 0.5);
+  --category-text: #fff;
+  --category-subtext: #cdd4dd;
+  --category-hover-gradient-opacity: 0.05;
+
+  --footer-bg: #0f112a;
+  --footer-text: #fff;
+  --footer-subtext: #d1d5db;
+  --footer-border: #1f203e;
+  --footer-card-bg: #11142e;
+  --footer-card-hover-bg: #1f203e;
+}
+
+/* ===========================================================
+   BASE
+=========================================================== */
+body {
+  background: var(--page-bg);
+  color: var(--page-text);
+}
+/* Header bg (optional if needed) */
+header {
+  background-color: var(--header-bg);
+}
+/* Category Section */
+
+/* ===========================================================
+   SECTIONS
+=========================================================== */
+.app-section {
+  background: var(--section-bg);
+  border: 1px solid var(--section-border);
+  border-radius: 1.5rem;
+  padding: 4rem 1.25rem;
+  margin: 4rem auto;
+  max-width: 80rem;
+}
+
+.app-section.special {
+  background: var(--special-section-bg);
+}
+
+/* ===========================================================
+   TYPOGRAPHY
+=========================================================== */
+h1, h2, h3, h4, h5 {
+  font-family: Rajdhani, system-ui, sans-serif;
+  letter-spacing: -0.03em;
+  font-weight: 700;
+}
+
+p {
+  font-family: Inter, system-ui, sans-serif;
+  letter-spacing: 0.04em;
+  line-height: 1.65;
+}
+
+/* ===========================================================
+   CARD SYSTEM (NEW + LEGACY MAPPED)
+=========================================================== */
+:root {
+  --card-bg: var(--category-card-bg);
+  --card-border: var(--category-border);
+  --card-shadow: var(--category-card-shadow);
+  --heading: var(--category-text);
+  --text-muted: var(--category-subtext);
+}
+
+.dark {
+  --card-bg: var(--category-card-bg);
+  --card-border: var(--category-border);
+  --card-shadow: 0 18px 40px rgba(0,0,0,.55);
+  --heading: var(--category-text);
+  --text-muted: var(--category-subtext);
+}
+
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 1.25rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.card-hover {
+  transition: transform .35s ease, box-shadow .35s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-4px) scale(1.03);
+  box-shadow: var(--card-shadow);
+}
+
+.card-overlay {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  opacity: var(--category-hover-gradient-opacity);
+  transition: opacity .35s ease;
+}
+
+.group:hover .card-overlay {
+  opacity: calc(var(--category-hover-gradient-opacity) * 3);
+}
+
+.card-icon-wrap {
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.25);
+}
+
+.card-title {
+  color: var(--heading);
+}
+
+.card-desc {
+  color: var(--text-muted);
+}
+
+.card-corner {
+  position: absolute;
+  top: .5rem;
+  right: .5rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-top: 2px solid var(--category-corner-accent);
+  border-right: 2px solid var(--category-corner-accent);
+  border-radius: 0 .75rem 0 0;
+  transition: border-color .3s ease;
+}
+
+.group:hover .card-corner {
+  border-color: var(--category-corner-accent-hover);
+}
+
+
+
+/* -----------------------------------------------------------
+   ANIMATIONS
+----------------------------------------------------------- */
+
+/* Drone Floating */
+@keyframes floatDrone {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+.animate-float-drone { animation: floatDrone 3s ease-in-out infinite; }
+
+/* Fan Rotation - Realistic */
+@keyframes spinCW { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+@keyframes spinCCW { 0% { transform: rotate(0deg); } 100% { transform: rotate(-360deg); } }
+
+#fanTopLeft,
+#fanBottomRight {
+  transform-origin: 50% 50%;
+  transform-box: fill-box;
+  animation: spinCW 0.4s linear infinite;
+  backface-visibility: hidden;
+  will-change: transform;
+  transform-style: preserve-3d;
+}
+
+#fanTopRight,
+#fanBottomLeft {
+  transform-origin: 50% 50%;
+  transform-box: fill-box;
+  animation: spinCCW 0.4s linear infinite;
+  backface-visibility: hidden;
+  will-change: transform;
+  transform-style: preserve-3d;
+}
+
+/* Droplet Spray */
+.spray-droplets { position: absolute; }
+.droplet {
+  position: absolute;
+  top: 0;
+  width: 4px;
+  height: 8px;
+  background: rgba(76, 228, 255, 0.9);
+  border-radius: 50%;
+  filter: blur(0.3px);
+  animation: dropletFall 1.2s linear infinite;
+  opacity: 0.7;
+}
+@keyframes dropletFall {
+  0% { transform: translateY(0) scale(1); opacity: 0.9; }
+  100% { transform: translateY(80px) scale(0.4); opacity: 0; }
+}
