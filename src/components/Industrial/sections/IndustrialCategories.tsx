@@ -9,11 +9,11 @@ const EducationCategories = () => {
         {/* Header */}
         
          <header className="text-center mb-14 space-y-4">
-          <h2 className="text-[var(--hero-text)] text-2xl sm:text-3xl md:text-4xl font-display leading-tight">
-            Educational Categories
+          <h2 className=" text-2xl sm:text-3xl md:text-4xl font-display leading-tight">
+            Industrial & Commercial Categories
           </h2>
           <p className="text-[var(--category-subtext)] max-w-2xl mx-auto text-sm sm:text-base md:text-lg font-sans">
-            Browse all educational product categories and lab solutions.
+             Explore industrial automation, power systems, and commercial equipment categories.
           </p>
         </header>
 

@@ -2,8 +2,8 @@ import React from "react";
 import { useParams } from "react-router-dom";
 import { Header } from "../../../components/Header";
 import { Footer } from "../../../components/Footer";
-import { educationalItems } from "../../../components/Education/data/educationalItems";
-import GlowBackground from "../../../components/ui/GlowBackground";
+import { industrialItems } from "../../../components/Industrial/data/industrialItems";
+
 
 export default function FinalItemPage() {
   const { categoryId, itemId } = useParams();
@@ -12,7 +12,7 @@ export default function FinalItemPage() {
     return <div className="pt-40 text-center">Invalid URL</div>;
   }
 
-  const category = educationalItems[categoryId as keyof typeof educationalItems];
+  const category = industrialItems[categoryId as keyof typeof industrialItems];
   const item = category?.items.find((i) => i.id === itemId);
 
   if (!category || !item) {
@@ -22,11 +22,8 @@ export default function FinalItemPage() {
   return (
     <>
       <Header />
-      
 <div className="px-2 py-10">
-      <section className="app-section relative overflow-hidden">
-        <GlowBackground  />
-
+      <section className="app-section">
         <div className="max-w-5xl mx-auto">
 
           {/* Card */}
@@ -51,7 +48,7 @@ export default function FinalItemPage() {
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-display">
                 {item.name}
               </h1>
-              <p className="text-base ">
+              <p className="text-base text-">
                 {item.code}
               </p>
             </header>

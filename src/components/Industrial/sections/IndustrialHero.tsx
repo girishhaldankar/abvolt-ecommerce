@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
-import ElectroStaticImg from "../../../assets/electrostatic.jpg";
-import educationalImage from "../../../assets/education.jpg";
+import ElectroStaticImg from "../../../assets/microchip.jpg";
+import educationalImage from "../../../assets/industrialCommercial.jpg";
 
 export default function EducationHero() {
   return (
@@ -8,7 +8,7 @@ export default function EducationHero() {
       className="
         relative min-h-screen flex items-center overflow-hidden
         pt-24 sm:pt-32 lg:pt-0
-        text-[var(--hero-text)]
+        
         z-0
       "
       style={{ background: "var(--hero-bg)" }}
@@ -33,11 +33,11 @@ export default function EducationHero() {
             transition={{ duration: 1 }}
           >
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-display leading-tight">
-              Educational Solutions
+              Industrial & Commercial Solutions
             </h1>
 
             <p className="text-base md:text-lg opacity-80 max-w-md mx-auto lg:mx-0">
-              STEM Kits, Lab Equipment, Industrial Training Modules & More
+             Industrial Automation, Electrical Systems, Machinery Components & Commercial Equipment
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">

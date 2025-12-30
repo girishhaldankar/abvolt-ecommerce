@@ -15,7 +15,11 @@ export function Footer() {
   ];
 
   return (
-    <footer className="relative border-t border-[var(--footer-border)] bg-[var(--footer-bg)] transition-colors duration-500">
+    <footer
+  className="relative border-t border-[var(--footer-border)] transition-colors duration-500"
+  style={{ background: "var(--footer-bg)" }}
+>
+
       {/* Top glow line */}
       <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent"></div>
        
@@ -40,7 +44,7 @@ export function Footer() {
             <div className="space-y-3">
               <div className="flex items-center gap-3 text-[var(--footer-subtext)]">
                 <Mail className="w-4 h-4 text-cyan-400" />
-                <span>support@technova.com</span>
+                <span>support@abvoltindia.com</span>
               </div>
               <div className="flex items-center gap-3 text-[var(--footer-subtext)]">
                 <Phone className="w-4 h-4 text-cyan-400" />
@@ -48,7 +52,7 @@ export function Footer() {
               </div>
               <div className="flex items-center gap-3 text-[var(--footer-subtext)]">
                 <MapPin className="w-4 h-4 text-cyan-400" />
-                <span>123 Tech Street, Silicon Valley, CA</span>
+                <span>123 Tech Street, Mumbai, India</span>
               </div>
             </div>
           </div>
@@ -110,7 +114,7 @@ export function Footer() {
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             {/* Copyright */}
             <p className="text-[var(--footer-subtext)]">
-              © 2025 TechNova. All rights reserved.
+              © 2025 ABvolt. All rights reserved.
             </p>
 
             {/* Social links */}

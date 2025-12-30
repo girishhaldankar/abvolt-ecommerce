@@ -8,79 +8,118 @@
 =========================================================== */
 :root {
   /* Glass */
-  --glass-bg: rgba(255, 255, 255 / 0%);
+  --glass-bg: rgba(255, 255, 255, 0.5);
   --glass-border: rgba(255, 255, 255, 0.3);
   --glass-highlight: rgba(255, 255, 255, 0.5);
   --glass-text: #1f2937;
 
+--hero-bg: radial-gradient(ellipse 120% 70% at 50% 45%,oklch(88.874% .01306 203.325) 0%,oklch(0.96 0.01 0 / 0.18) 72%,oklch(65% .03 210/0) 100%);
+
+--hero-title: #015A5A;
+--hero-text: #475569; /* slightly warmer slate */
+
+
+ --hero-primary-btn-bg: #118989; /* solid background */
+  --hero-primary-btn-text: #fff;
+  --hero-primary-btn-shadow: 0 6px 20px rgba(1, 90, 90, 0.4); /* optional shadow */
+
+  --hero-secondary-btn-bg: rgba(255, 255, 255, 0.1);
+  --hero-secondary-btn-text: #015A5A;
+  --hero-secondary-btn-shadow: 0 0 0 rgba(0,0,0,0);
+
+
   /* Page */
-  --page-bg: oklch(0.62 0.14 192.26);
-  --page-bg-rgb: 166, 190, 200;
+ --page-bg: oklch(0.96 0.01 195.09);
+--page-bg-rgb: 208, 231, 242; /* for overlay / shadow use */
+
   --page-text: #000;
-  --header-text: #111;
+  --header-text: #015A5A;
+   --btn-bg: linear-gradient(135deg, #2563eb, #3b82f6);
+  --btn-text: #ffffff;
+  --btn-shadow: 0 10px 30px rgba(37, 99, 235, 0.35);
+  --btn-border: rgba(255, 255, 255, 0.4);
 
   --menu-hover-color: #0b05b5;
   --dropdown-hover-bg: rgba(14, 165, 233, 0.2);
 
   /* Section */
+ 
   --section-bg: radial-gradient(
     ellipse at center,
-    rgba(255, 245, 235, 0.7) 0%,
-    rgba(235, 245, 255, 0.5) 50%,
-    #c8c8c8 100%
+    rgba(255, 255, 255, 0.75) 0%,
+    rgba(245, 235, 228, 0.55) 45%,
+    rgba(235, 230, 225, 0.35) 100%
   );
 
-  --section-border: rgba(0,0,0,.08);
+  --section-border: rgba(255, 255, 255, 0.45);
 
-  /* Hero */
-  --hero-bg: radial-gradient(
-    ellipse 120% 70% at 50% 45%,
-    oklch(88.874% 0.01306 203.325) 0%,
-    oklch(0.65 0.03 210 / 0.18) 72%,
-    oklch(0.65 0.03 210 / 0) 100%
-  );
 
-  --hero-text: #0d0d0d;
-  --hero-button: #3b82f6;
-  --hero-button-text: #fff;
 
   /* Special */
-  --special-section-bg:
-    linear-gradient(rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.25)),
+   --special-section-bg:
+    linear-gradient(
+      rgba(255, 255, 255, 0.22),
+      rgba(255, 255, 255, 0.22)
+    ),
     radial-gradient(
       ellipse at 30% 20%,
-      oklch(0.95 0.02 240) 0%,
-      oklch(0.90 0.03 240) 20%,
-      oklch(0.67745 0.01657 242.024) 100%
+      oklch(0.95 0.02 240 / 0.65) 0%,
+      oklch(0.90 0.03 240 / 0.45) 25%,
+      oklch(0.67745 0.01657 242.024 / 0.25) 100%
     );
 
-  /* CATEGORY (legacy) */
-  --category-card-bg: linear-gradient(145deg, #ffffff 0%, #f9faff 100%);
-  --category-card-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
-  --category-border: rgba(203, 213, 225, 0.9);
-  --category-text: #111;
-  --category-subtext: #404955;
-  --category-hover-text: #111;
-  --category-hover-gradient-opacity: 0.1;
-  --category-corner-accent: rgba(27, 27, 28, 0.6);
-  --category-corner-accent-hover: rgb(236, 237, 244);
+  /* CATEGORY – UPDATED */
+--category-card-bg: linear-gradient(145deg, #ffffff 0%, #f9faff 100%);
+
+--category-card-shadow: 
+  0 4px 12px rgba(0, 0, 0, 0.06);
+
+--category-card-shadow-hover: 
+  0 14px 36px rgba(0, 0, 0, 0.12);
+
+--category-border: rgba(203, 213, 225, 0.9);
+--category-text: #111;
+--category-subtext: #404955;
+
+--category-hover-gradient-opacity: 0.2;
+--category-corner-accent: rgba(27, 27, 28, 0.6);
+--category-corner-accent-hover: rgb(236, 237, 244);
+
 
   
 
   /* Footer */
-  --footer-bg: #f8f9fa;
+  --footer-bg:
+  radial-gradient(
+    ellipse 140% 70% at 50% -20%,
+    rgba(255, 200, 140, 0.35),
+    rgba(255, 200, 140, 0.18) 35%,
+    rgba(0, 0, 0, 0.06) 60%,
+    transparent 75%
+  ),
+  linear-gradient(
+    180deg,
+    #f1f3f5 0%,
+    #f8f9fa 40%
+  );
+
+
   --footer-text: #111827;
   --footer-subtext: #6b7280;
   --footer-border: #e5e7eb;
   --footer-card-bg: #fff;
   --footer-card-hover-bg: #f1f5f9;
+
+   --logo-primary: #015a5a;   /* light mode primary */
+   
+
 }
 
 /* ===========================================================
    🌙 DARK THEME
 =========================================================== */
 .dark {
-  --glass-bg: rgb(31 41 55 / 0%);
+  --glass-bg: rgba(25, 67, 101, 0.6);
   --glass-border: rgba(255, 255, 255, 0.08);
   --glass-highlight: rgba(255, 255, 255, 0.12);
   --glass-text: #f9fafb;
@@ -89,16 +128,17 @@
   --page-bg-rgb: 11, 15, 63;
   --page-text: #fff;
   --header-text: #fff;
+  --btn-bg: linear-gradient(135deg, #38bdf8, #22d3ee);
+  --btn-text: #020617;
+  --btn-shadow: 0 14px 40px rgba(34, 211, 238, 0.45);
+  --btn-border: rgba(255, 255, 255, 0.15);
 
   --menu-hover-color: #f687b3;
   --dropdown-hover-bg: rgba(236, 72, 153, 0.2);
 
-  --section-bg: radial-gradient(
-    circle at 25% 25%,
-    rgba(255, 220, 180, 0.4) 0%,
-    rgba(200, 230, 250, 0.3) 40%,
-    #11142e 100%
-  );
+ --section-bg: radial-gradient(circle at 25% 25%,#ffdcb466 0%,#c8e6fa4d 40%,#11142e 100%);
+
+  --section-border: rgba(255, 255, 255, 0.18);
 
   --hero-bg: radial-gradient(
     ellipse farthest-side at center,
@@ -107,7 +147,16 @@
     oklch(14.197% 0.06791 267.878) 100%
   );
 
-  --hero-text: #fff;
+   --hero-title: #f8fafc;   /* near white */
+  --hero-text:  #cbd5e1;   /* slate-300 */
+
+  --hero-primary-btn-bg: #1e40af;
+  --hero-primary-btn-text: #fff;
+  --hero-primary-btn-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+
+  --hero-secondary-btn-bg: rgba(255, 255, 255, 0.05);
+  --hero-secondary-btn-text: #93c5fd;
+  --hero-secondary-btn-shadow: 0 0 0 rgba(0,0,0,0);
 
   --special-section-bg: radial-gradient(
     circle at 25% 25%,
@@ -116,19 +165,35 @@
     rgb(52, 73, 128) 100%
   );
 
-  --category-card-bg: rgba(15, 23, 42, 0.6);
-  --category-card-shadow: 0 18px 40px rgba(0,0,0,.55);
-  --category-border: rgba(75, 85, 99, 0.5);
-  --category-text: #fff;
-  --category-subtext: #cdd4dd;
-  --category-hover-gradient-opacity: 0.05;
+  /* DARK MODE – tuned */
+--category-card-bg: rgba(15, 23, 42, 0.75);   /* slightly richer base */
+--category-card-shadow: 0 18px 40px rgba(0,0,0,.6);
+--category-border: rgba(75, 85, 99, 0.55);
 
-  --footer-bg: #0f112a;
+--category-text: #ffffff;
+--category-subtext: #cdd4dd;
+
+/* 🔥 Key fix */
+--category-hover-gradient-opacity: 0.09;
+
+
+  --footer-bg: 
+  radial-gradient(
+    ellipse 120% 60% at 50% 0%,
+    rgba(120, 140, 255, 0.18),
+    rgba(120, 140, 255, 0.08) 35%,
+    rgba(15, 17, 42, 1) 70%
+  );
+
   --footer-text: #fff;
   --footer-subtext: #d1d5db;
   --footer-border: #1f203e;
   --footer-card-bg: #11142e;
   --footer-card-hover-bg: #1f203e;
+
+   --logo-primary: #19a9ba;
+  --logo-secondary: #ffffff;
+  --logo-accent: #ff8f00;
 }
 
 /* ===========================================================
@@ -137,24 +202,66 @@
 body {
   background: var(--page-bg);
   color: var(--page-text);
+  -webkit-font-smoothing: antialiased; /* for Chrome, Safari */
+  -moz-osx-font-smoothing: grayscale; /* for Firefox */
 }
+p {
+  font-size: clamp(14px, 2vw, 18px); /* scales between 14px and 18px */
+}
+.abvolt-logo {
+  filter: drop-shadow(0 2px 6px rgba(61, 59, 59, 0.35))
+          drop-shadow(0 0 10px rgba(77, 208, 225, 0.289));
+}
+
 /* Header bg (optional if needed) */
 header {
   background-color: var(--header-bg);
 }
 /* Category Section */
 
+.hero-button {
+  background: var(--hero-primary-btn-bg);
+  color: white;
+  font-weight: 500;
+}
+
+.hero-secondary {
+  background: var(--hero-secondary-btn-bg);
+  color: #2563eb;
+  border: 1px solid var(--hero-secondary-btn-border);
+}
+
+.hero-button:hover {
+  box-shadow: 0 10px 30px rgba(37, 99, 235, 0.35);
+}
+
 /* ===========================================================
    SECTIONS
 =========================================================== */
+
 .app-section {
-  background: var(--section-bg);
+  background:
+   
+    var(--section-bg);
+
+  backdrop-filter: blur(24px) saturate(140%);
+  -webkit-backdrop-filter: blur(24px) saturate(140%);
+
   border: 1px solid var(--section-border);
-  border-radius: 1.5rem;
-  padding: 4rem 1.25rem;
+  border-radius: 1.75rem;
+
+  padding: 4rem 1.5rem;
   margin: 4rem auto;
   max-width: 80rem;
+
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.12),
+  inset 0 1px 1px rgba(255, 255, 255, 0.4);
 }
+
+
+
+
 
 .app-section.special {
   background: var(--special-section-bg);
@@ -263,6 +370,8 @@ p {
   50% { transform: translateY(-6px); }
 }
 .animate-float-drone { animation: floatDrone 3s ease-in-out infinite; }
+/* SVG */
+#heroSvgContainer svg { width: 95%; height: auto; overflow: visible; will-change: transform, opacity; }
 
 /* Fan Rotation - Realistic */
 @keyframes spinCW { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }

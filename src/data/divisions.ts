@@ -1,4 +1,10 @@
-import { Book, Factory, GraduationCap, Wrench, ShoppingBag } from "lucide-react";
+import {
+  Book,
+  Factory,
+  GraduationCap,
+  Wrench,
+  ShoppingBag,
+} from "lucide-react";
 
 export const divisions = [
   {
@@ -9,7 +15,42 @@ export const divisions = [
     path: "/educational",
     icon: Book,
     color: "from-cyan-500 to-blue-500",
+
+    // 🔽 ADD THIS (tree starts here)
+    streams: [
+      {
+        id: "engineering",
+        title: "Engineering",
+        categories: [
+          {
+            id: "basic-electronics",
+            title: "Basic Electronics",
+            items: [
+              {
+                id: "diodes",
+                name: "Experimentation with Diodes",
+                code: "EE-BE-01",
+                path: "/educational/engineering/basic-electronics/diodes",
+              },
+              {
+                id: "rectifiers",
+                name: "Rectifier Experiments",
+                code: "EE-BE-02",
+                path: "/educational/engineering/basic-electronics/rectifiers",
+              },
+            ],
+          },
+          {
+            id: "basic-science",
+            title: "Basic Science",
+            items: [],
+          },
+        ],
+      },
+    ],
   },
+
+  // ❌ No tree needed for others (for now)
   {
     id: "industrial",
     type: "internal",
@@ -37,9 +78,11 @@ export const divisions = [
     icon: Wrench,
     color: "from-purple-500 to-pink-500",
   },
+
+  // 🔑 SPECIAL CASE
   {
     id: "shop",
-    type: "shop", // 🔑 SPECIAL
+    type: "shop",
     title: "Online Shop",
     description: "Purchase products online",
     path: "/shop",

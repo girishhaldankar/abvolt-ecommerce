@@ -1,7 +1,7 @@
 import ElectricityLabTrainerImg from "../../../assets/ElectricityLabTrainer.jpg";
 import ExprementImg from "../../../assets/exprement.jpg";
 import ElectroStaticImg from "../../../assets/electrostatic.jpg";
-export const educationalItems = {
+export const industrialItems = {
   "basic-electronics": {
     title: "Basic Electronics",
     items: [

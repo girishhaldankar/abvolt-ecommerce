@@ -1,59 +1,21 @@
 import { useState, useEffect } from "react";
 import { Menu, X, ChevronDown } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import ThemeToggle from "./ThemeToggle";
-
-interface SubMenuItem {
-  name: string;
-  path: string;
-}
+import AbvoltLogo from "./AbvoltLogo";
+import { divisions } from "../data/divisions";
+import { getEducationHeaderMenu, SubMenuItem } from "../data/adapters/educationHeaderAdapter";
 
 interface ServiceMenu {
   title: string;
   items: SubMenuItem[];
 }
 
-/* ---------------------------------------------------
-   TOP MENU
------------------------------------------------------ */
-const navItems = [
-  { name: "Home", path: "/" },
-  { name: "Shop", path: "/shop" },
-
-  // DROPDOWN MENUS
-  { name: "Educational", type: "educational" },
-  { name: "Industrial & Commercial", type: "industrial" },
-  { name: "Training Services", type: "training" },
-
-  { name: "Services", path: "/services" },
-  { name: "About", path: "/about" },
-  { name: "Contact", path: "/contact" },
-];
-
-/* ---------------------------------------------------
-   DROPDOWN MENU DATA
------------------------------------------------------ */
+// Dynamic services menu
 const services: ServiceMenu[] = [
   {
     title: "Educational",
-    items: [
-      { name: "Basic Electronics Products", path: "/educational/basic-electronics" },
-      { name: "Basic Science", path: "/educational/basic-science" },
-      { name: "Decade Boxes", path: "/educational/decade-boxes" },
-      { name: "Digital Communication", path: "/educational/digital-communication" },
-      { name: "Digital Electronics", path: "/educational/digital-electronics" },
-      { name: "Discovery Series", path: "/educational/discovery-series" },
-      { name: "Electrical Engineering Products", path: "/educational/electrical-engineering" },
-      { name: "Embedded System Solutions", path: "/educational/embedded-systems" },
-      { name: "Engineering & Vocational Products", path: "/educational/engineering-vocational" },
-      { name: "Instrumentation & Control", path: "/educational/instrumentation-control" },
-      { name: "Mechanical Engineering", path: "/educational/mechanical-engineering" },
-      { name: "Microwave Lab", path: "/educational/microwave-lab" },
-      { name: "Physics", path: "/educational/physics" },
-      { name: "Power Electronics", path: "/educational/power-electronics" },
-      { name: "Robotics", path: "/educational/robotics" },
-      { name: "STEM", path: "/educational/stem" },
-    ],
+    items: getEducationHeaderMenu(), // generated from educationData
   },
   {
     title: "Industrial & Commercial",
@@ -71,42 +33,76 @@ const services: ServiceMenu[] = [
   },
 ];
 
+// Standard nav items
+const navItems = [
+  { name: "Home", path: "/" },
+  ...divisions.map((d) => ({ name: d.title, path: d.path })),
+  { name: "About", path: "/about" },
+  { name: "Contact", path: "/contact" },
+];
+
 export function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [hoveredService, setHoveredService] = useState("");
+  const [hoveredService, setHoveredService] = useState(""); // desktop hover
+  const [mobileServiceOpen, setMobileServiceOpen] = useState(""); // mobile main menu
+  const [mobileSubOpen, setMobileSubOpen] = useState(""); // mobile nested submenu
+  const location = useLocation();
 
-  // Scroll detection for header background
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Prevent body scroll when mobile menu is open
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? "hidden" : "auto";
-    return () => {
-      document.body.style.overflow = "auto";
-    };
   }, [mobileOpen]);
+
+  // Render desktop dropdown
+  const renderDesktopDropdown = (items: SubMenuItem[]) =>
+    items.map((sub) =>
+      sub.children ? (
+        <div key={sub.name} className="group relative">
+          <span className="flex items-center justify-between px-4 py-2 cursor-pointer hover:bg-[var(--dropdown-hover-bg)] whitespace-nowrap">
+  <span>{sub.name}</span>
+  <ChevronDown size={12} className="ml-2 shrink-0" />
+</span>
+
+          <div className="absolute top-0 left-full ml-1 w-56 bg-[var(--page-bg)] text-[var(--page-text)] shadow-lg rounded-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+            {sub.children.map((child) => (
+              <Link
+                key={child.name}
+                to={child.path || "#"}
+                className="block px-4 py-2 hover:bg-[var(--dropdown-hover-bg)] hover:text-[var(--dropdown-hover-text)]"
+              >
+                {child.name}
+              </Link>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <Link
+          key={sub.name}
+          to={sub.path || "#"}
+          className="block px-4 py-2 hover:bg-[var(--dropdown-hover-bg)] hover:text-[var(--dropdown-hover-text)]"
+        >
+          {sub.name}
+        </Link>
+      )
+    );
 
   return (
     <header
-      className={`fixed top-0 left-0 w-full z-50 transition-all duration-500
-        ${scrolled
-          ? "bg-[rgba(255,255,255,0.95)] dark:bg-[rgba(11,15,63,0.95)] backdrop-blur-lg shadow-md py-3 md:py-4"
-          : "bg-transparent py-4 md:py-5"
+      className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${
+        scrolled
+          ? "bg-[rgba(255,255,255,0.95)] dark:bg-[rgba(11,15,63,0.95)] backdrop-blur-lg shadow-md h-16 md:h-20"
+          : "bg-transparent h-20 md:h-24"
       }`}
     >
-      <div className="container mx-auto px-6 flex items-center justify-between">
-
-        {/* LOGO */}
-        <Link
-          to="/"
-          className="text-2xl font-bold text-[var(--header-text)] whitespace-nowrap"
-        >
-          Logo
+      <div className="container mx-auto px-6 h-full flex items-center justify-between">
+        <Link to="/">
+          <AbvoltLogo className="w-44 h-auto" />
         </Link>
 
         {/* DESKTOP NAV */}
@@ -120,28 +116,15 @@ export function Header() {
               if (!dropdown) {
                 return (
                   <Link
-  key={item.name}
-  to={item.path}
-  className="relative text-[var(--header-text)] hover:text-[var(--menu-hover-color)] transition-colors duration-200"
->
-  {item.name}
-
-  {/* Animated underline */}
-  <span
-    className={`
-      absolute left-0 -bottom-1 h-[2px] w-full
-      bg-green-500
-      transform scale-x-0 origin-left
-      transition-transform duration-300
-      ${location.pathname === item.path ? "scale-x-100" : "hover:scale-x-100"}
-    `}
-  />
-</Link>
-
+                    key={item.name}
+                    to={item.path}
+                    className="relative text-[var(--header-text)] hover:text-[var(--menu-hover-color)] transition-colors duration-200"
+                  >
+                    {item.name}
+                  </Link>
                 );
               }
 
-              // Dropdown menu
               return (
                 <div
                   key={item.name}
@@ -155,23 +138,13 @@ export function Header() {
 
                   {/* Dropdown Panel */}
                   <div
-                    className={`absolute left-1/2 -translate-x-1/2 top-full mt-2 w-60
-                      bg-[rgba(var(--page-bg-rgb),0.95)] text-[var(--page-text)]
-                      backdrop-blur-md shadow-lg rounded-md transition-all duration-300 z-50
-                      ${hoveredService === item.name ? "opacity-100 visible scale-100" : "opacity-0 invisible scale-95"}`}
-                    style={{ boxShadow: "0 10px 25px rgba(0,0,0,0.1), 0 0 30px rgba(0,255,255,0.1)" }}
+                    className={`absolute left-1/2 -translate-x-1/2 top-full mt-2 min-w-[220px] bg-[rgba(var(--page-bg-rgb),0.95)] text-[var(--page-text)] backdrop-blur-md shadow-lg rounded-md transition-all duration-300 z-50 ${
+                      hoveredService === item.name
+                        ? "opacity-100 visible scale-100"
+                        : "opacity-0 invisible scale-95"
+                    }`}
                   >
-                    {dropdown.items.map((sub) => (
-                      <Link
-                        key={sub.name}
-                        to={sub.path}
-                        className="block px-4 py-2 text-sm transition-colors duration-200
-                                   hover:bg-[var(--dropdown-hover-bg)]
-                                   hover:text-[var(--dropdown-hover-text)]"
-                      >
-                        {sub.name}
-                      </Link>
-                    ))}
+                    {renderDesktopDropdown(dropdown.items)}
                   </div>
                 </div>
               );
@@ -183,7 +156,6 @@ export function Header() {
         <div className="flex items-center space-x-4">
           <ThemeToggle />
 
-          {/* MOBILE MENU BUTTON */}
           <button
             className="md:hidden text-[var(--header-text)]"
             onClick={() => setMobileOpen(!mobileOpen)}
@@ -219,29 +191,65 @@ export function Header() {
                 <div
                   className="flex justify-between items-center cursor-pointer text-[var(--header-text)]"
                   onClick={() =>
-                    setHoveredService(hoveredService === item.name ? "" : item.name)
+                    setMobileServiceOpen(
+                      mobileServiceOpen === item.name ? "" : item.name
+                    )
                   }
                 >
-                  <span className="text-[var(--header-text)]">{item.name}</span>
+                  <span>{item.name}</span>
                   <ChevronDown
                     size={16}
-                    className={`transition-transform ${hoveredService === item.name ? "rotate-180" : ""}`}
+                    className={`transition-transform ${
+                      mobileServiceOpen === item.name ? "rotate-180" : ""
+                    }`}
                   />
                 </div>
 
-                {hoveredService === item.name && (
-                  <div className="ml-4 mt-2 text-[var(--header-text)]">
+                {mobileServiceOpen === item.name && (
+                  <div className="ml-4 mt-2 space-y-1">
                     {dropdown.items.map((sub) => (
-                      <Link
-                        key={sub.name}
-                        to={sub.path}
-                        className="block py-1 text-sm transition-colors duration-200
-                                   hover:bg-[var(--dropdown-hover-bg)]
-                                   hover:text-[var(--dropdown-hover-text)]"
-                        onClick={() => setMobileOpen(false)}
-                      >
-                        {sub.name}
-                      </Link>
+                      <div key={sub.name}>
+                        {sub.children ? (
+                          <>
+                            <div
+                              className="flex justify-between items-center cursor-pointer px-2 py-1 hover:bg-[var(--dropdown-hover-bg)]"
+                              onClick={() =>
+                                setMobileSubOpen(
+                                  mobileSubOpen === sub.name ? "" : sub.name
+                                )
+                              }
+                            >
+                              <span>{sub.name}</span>
+                              <ChevronDown
+                                size={14}
+                                className={`transition-transform ${
+                                  mobileSubOpen === sub.name ? "rotate-180" : ""
+                                }`}
+                              />
+                            </div>
+                            {mobileSubOpen === sub.name &&
+                              sub.children.map((child) => (
+                                <Link
+                                  key={child.name}
+                                  to={child.path || "#"}
+                                  className="block px-4 py-1 text-sm hover:bg-[var(--dropdown-hover-bg)]"
+                                  onClick={() => setMobileOpen(false)}
+                                >
+                                  {child.name}
+                                </Link>
+                              ))}
+                          </>
+                        ) : (
+                          <Link
+                            key={sub.name}
+                            to={sub.path || "#"}
+                            className="block px-4 py-1 text-sm hover:bg-[var(--dropdown-hover-bg)]"
+                            onClick={() => setMobileOpen(false)}
+                          >
+                            {sub.name}
+                          </Link>
+                        )}
+                      </div>
                     ))}
                   </div>
                 )}
