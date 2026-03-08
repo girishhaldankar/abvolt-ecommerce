@@ -2,9 +2,11 @@
   import { defineConfig } from 'vite';
   import react from '@vitejs/plugin-react-swc';
   import path from 'path';
+  import svgr from "vite-plugin-svgr";
 
   export default defineConfig({
-    plugins: [react()],
+      plugins: [react(), svgr()],
+    assetsInclude: ["**/*.glb"], 
     resolve: {
       extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
       alias: {
@@ -51,7 +53,7 @@
     },
     build: {
       target: 'esnext',
-      outDir: 'build',
+      outDir: 'dist',
     },
     server: {
       port: 3000,

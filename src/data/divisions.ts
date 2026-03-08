@@ -15,42 +15,8 @@ export const divisions = [
     path: "/educational",
     icon: Book,
     color: "from-cyan-500 to-blue-500",
-
-    // 🔽 ADD THIS (tree starts here)
-    streams: [
-      {
-        id: "engineering",
-        title: "Engineering",
-        categories: [
-          {
-            id: "basic-electronics",
-            title: "Basic Electronics",
-            items: [
-              {
-                id: "diodes",
-                name: "Experimentation with Diodes",
-                code: "EE-BE-01",
-                path: "/educational/engineering/basic-electronics/diodes",
-              },
-              {
-                id: "rectifiers",
-                name: "Rectifier Experiments",
-                code: "EE-BE-02",
-                path: "/educational/engineering/basic-electronics/rectifiers",
-              },
-            ],
-          },
-          {
-            id: "basic-science",
-            title: "Basic Science",
-            items: [],
-          },
-        ],
-      },
-    ],
   },
 
-  // ❌ No tree needed for others (for now)
   {
     id: "industrial",
     type: "internal",
@@ -60,6 +26,7 @@ export const divisions = [
     icon: Factory,
     color: "from-blue-500 to-indigo-500",
   },
+
   {
     id: "training",
     type: "internal",
@@ -69,6 +36,7 @@ export const divisions = [
     icon: GraduationCap,
     color: "from-indigo-500 to-purple-500",
   },
+
   {
     id: "services",
     type: "internal",
@@ -79,7 +47,16 @@ export const divisions = [
     color: "from-purple-500 to-pink-500",
   },
 
-  // 🔑 SPECIAL CASE
+  {
+    id: "xyz",
+    type: "internal",
+    title: "XYZ Services",
+    description: "XYZ consulting and collaboration programs",
+    path: "/xyz",
+    icon: Wrench,
+    color: "from-pink-500 to-rose-500",
+  },
+
   {
     id: "shop",
     type: "shop",
@@ -89,4 +66,5 @@ export const divisions = [
     icon: ShoppingBag,
     color: "from-pink-500 to-rose-500",
   },
+  
 ];

@@ -11,6 +11,7 @@ import { ImageFallback } from "../../../components/ImageFallback";
 import { Header } from "../../../components/Header";
 
 import { Footer } from "../../../components/Footer";
+import GlowBackground from "../../../components/ui/GlowBackground";
 
 export default function ProductDetailPage() {
   const { id } = useParams();
@@ -68,8 +69,8 @@ export default function ProductDetailPage() {
         </div>
 
         {/* MAIN GRID */}
-        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10">
-
+        <div className=" section max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10">
+<GlowBackground />
           {/* LEFT IMAGES */}
           <div className="space-y-4">
             <div className="w-full aspect-square rounded-2xl overflow-hidden border border-[var(--border)]">
@@ -121,13 +122,22 @@ export default function ProductDetailPage() {
 </div>
 
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
-              <button className="px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-full text-lg hover:scale-105 transition w-full sm:w-auto">
-                Add to Cart
-              </button>
-              <button className="px-6 py-3 border border-[var(--border)] rounded-full hover:bg-white/10 transition w-full sm:w-auto">
-                Buy Now
-              </button>
-            </div>
+
+  <button
+    onClick={() => navigate(`/shop/request-quote/${product.id}`)}
+    className="px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-full text-lg hover:scale-105 transition w-full sm:w-auto"
+  >
+    Request Quote
+  </button>
+
+  <button
+    onClick={() => navigate("/shop")}
+    className="px-6 py-3 border border-[var(--border)] rounded-full hover:bg-white/10 transition w-full sm:w-auto"
+  >
+    Back to Shop
+  </button>
+
+</div>
 
             {/* DESCRIPTION */}
             <div className="pt-4">

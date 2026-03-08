@@ -6,24 +6,25 @@ interface ThemeContextType {
 }
 
 const ThemeContext = createContext<ThemeContextType>({
-  darkMode: false,
+  darkMode: true, // default dark
   toggleTheme: () => {},
 });
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(true); // default dark
 
   // Set initial theme on page load
   useEffect(() => {
     const root = document.documentElement;
     const storedTheme = localStorage.getItem("theme");
 
-    if (storedTheme === "dark") {
-      root.classList.add("dark");
-      setDarkMode(true);
-    } else {
+    if (storedTheme === "light") {
       root.classList.remove("dark");
       setDarkMode(false);
+    } else {
+      // default dark
+      root.classList.add("dark");
+      setDarkMode(true);
     }
   }, []);
 

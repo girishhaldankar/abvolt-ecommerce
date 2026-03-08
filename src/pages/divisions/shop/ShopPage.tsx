@@ -1,8 +1,7 @@
-import {ProductGrid} from "../../../components/shop/ProductGrid";  // default export assumed
-
+import { ProductGrid } from "../../../components/shop/ProductGrid";
 import { products } from "../../../components/shop/data/products";
-import {Header} from "../../../components/Header";            // default export
-import {Footer} from "../../../components/Footer";            // default export
+import { Header } from "../../../components/Header";
+import { Footer } from "../../../components/Footer";
 
 export default function ShopPage() {
   return (
@@ -12,13 +11,13 @@ export default function ShopPage() {
     >
       <Header />
 
-      <div className="pt-32 max-w-7xl mx-auto px-4 sm:px-8 lg:px-16 mb-16">
+      <main className="pt-32 max-w-7xl mx-auto px-4 sm:px-8 lg:px-16 mb-16">
         <ProductGrid
           products={products}
           title="All Products"
-          description="Browse our full collection of electronics"
+          description="Browse our electronics catalog"
         />
-      </div>
+      </main>
 
       <Footer />
     </div>

@@ -1,7 +1,8 @@
 import { FC } from "react";
-import { ShoppingCart } from "lucide-react";
+
 import { useNavigate } from "react-router-dom";
 import { ImageFallback } from "../ImageFallback";
+import GlowBackground from "../../components/ui/GlowBackground";
 
 export interface Product {
   id: number;
@@ -52,7 +53,8 @@ export const ProductGrid: FC<ProductGridProps> = ({
   };
 
   return (
-    <section className="app-section">
+    <section className="section">
+      <GlowBackground />
       <div className="max-w-7xl mx-auto">
 
         {/* Title */}
@@ -117,26 +119,23 @@ export const ProductGrid: FC<ProductGridProps> = ({
 
                 <div className="flex items-center justify-between pt-2">
                   <div className="text-[var(--category-subtext)] font-semibold text-lg">
-                    ${product.price}
+                    Starting from ₹{product.price}
                   </div>
 
                   {/* Add to Cart */}
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      // cart logic here later
-                    }}
-                    className="px-4 py-2 bg-gradient-to-r
-                               from-cyan-600 to-blue-800
-                               text-white rounded-full
-                               hover:scale-105
-                               text-sm flex items-center gap-2
-                               transition-transform duration-200"
-                    aria-label={`Add ${product.name} to cart`}
-                  >
-                    <ShoppingCart className="w-4 h-4" />
-                    Add
-                  </button>
+                 <button
+  onClick={(e) => {
+    e.stopPropagation();
+    handleProductClick(product.id);
+  }}
+  className="px-4 py-2 bg-gradient-to-r
+             from-cyan-600 to-blue-800
+             text-white rounded-full
+             hover:scale-105
+             text-sm transition-transform duration-200"
+>
+  View
+</button>
                 </div>
               </div>
             </div>

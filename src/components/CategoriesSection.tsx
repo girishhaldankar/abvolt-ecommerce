@@ -11,7 +11,7 @@ import {
   Monitor,
   Smartphone,
   Cable,
-  Settings,
+  Sliders,
   Plane,
   Plug,
 } from "lucide-react";
@@ -95,7 +95,7 @@ const categories = [
   {
     name: "Mechanical Parts",
     description: "Aluminium, Mounts",
-    icon: Settings,
+    icon: Sliders,
     color: "from-teal-500 to-cyan-500",
   },
   {
@@ -117,8 +117,8 @@ const categories = [
 ----------------------------------------------------------- */
 export function CategoriesSection() {
   return (
-    <section className="app-section special">
-  <div className="max-w-7xl mx-auto px-4">
+    <section className="section ">
+  <div className="max-w-7xl  mx-auto px-4">
     <header className="section-header text-center mb-8">
       <h2 className="section-title text-3xl md:text-4xl">
         Our Categories
@@ -142,7 +142,7 @@ export function CategoriesSection() {
                 {/* Card */}
                 <div
                   className="
-                    relative h-full rounded-xl p-4 sm:p-6 overflow-hidden
+                    relative isolate  h-full rounded-xl p-4 sm:p-6 overflow-hidden
                     cursor-pointer
                     bg-[var(--category-card-bg)]
                     border border-[var(--category-border)]
@@ -152,15 +152,17 @@ export function CategoriesSection() {
                   "
                 >
                   {/* Hover Gradient */}
-                  <div
-                    className={`
-                      absolute inset-0 rounded-xl
-                      bg-gradient-to-br ${category.color}
-                      opacity-[var(--category-hover-gradient-opacity)]
-                      group-hover:opacity-[calc(var(--category-hover-gradient-opacity)*5)]
-                      transition-opacity duration-300
-                    `}
-                  />
+                 <div
+  className={`
+    absolute inset-0 rounded-xl
+    bg-gradient-to-br ${category.color}
+    opacity-10
+    group-hover:opacity-50
+    transition-opacity duration-300
+    pointer-events-none
+  `}
+/>
+
 
                   {/* Icon */}
                   <div className="relative mb-4 flex justify-center">
