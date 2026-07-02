@@ -151,8 +151,8 @@ export function HeroSection2() {
 
         const spinAnimation =
           id === "fanTopLeft" || id === "fanBottomRight"
-            ? "spinCW 0.4s linear infinite"
-            : "spinCCW 0.4s linear infinite";
+            ? "spinCW 0.5s linear infinite"
+            : "spinCCW 0.5s linear infinite";
 
         // Slide 0
         if (current === 0) {
@@ -184,7 +184,7 @@ export function HeroSection2() {
           fan.style.animation = spinAnimation;
         }
       });
-    }, 100);
+    }, 1100);
 
     return () => clearTimeout(timer);
   }, [current, svgContent]);

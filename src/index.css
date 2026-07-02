@@ -146,6 +146,19 @@ body {
 h1,h2,h3,h4,h5 { font-family: Rajdhani, system-ui, sans-serif; letter-spacing: 0.02em; }
 p { font-family: Inter, system-ui, sans-serif; letter-spacing: 0.04em; line-height: 1.65; }
 
+
+.custom-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.2);
+  border-radius: 10px;
+}
+
+.custom-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
 /* ===========================================================
    GLASS & SECTIONS
 =========================================================== */
@@ -264,24 +277,22 @@ html[data-theme="dark"] .app-section {
 
 @keyframes spinCW {
   from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
+  to { transform: rotate(360deg); }
 }
 
 @keyframes spinCCW {
   from { transform: rotate(0deg); }
-  to   { transform: rotate(-360deg); }
-}
-
-/* ================= FLOAT DRONE ================= */
-
-@keyframes floatDrone {
-  0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(-6px); }
+  to { transform: rotate(-360deg); }
 }
 
 .animate-float-drone {
-  animation: floatDrone 3s ease-in-out infinite;
-  will-change: transform;
+  animation: floatDrone 6s ease-in-out infinite;
+}
+
+@keyframes floatDrone {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
 }
 
 /* ================= SVG CONTAINER ================= */

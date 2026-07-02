@@ -11,6 +11,11 @@ import ShopPage from "./pages/divisions/shop/ShopPage";
 import ProductDetailPage from "./pages/divisions/shop/ProductDetailPage";
 import CartPage from "./pages/divisions/shop/CartPage";
 
+
+/* ---------------- QUBI IDE ---------------- */
+import QubiIDE from "./pages/QubiIDE";
+
+
 /* ---------------- ADMIN ---------------- */
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import DivisionForm from "./pages/admin/DivisionForm";
@@ -20,6 +25,8 @@ import CategoryForm from "./pages/admin/CategoryForm";
 import ItemForm from "./pages/admin/ItemForm";
 import ItemDetailPage from "./pages/admin/ItemDetailPage";
 import EditDivision from "./pages/admin/EditDivision";
+import AbvoltDAQPage from "./pages/AbvoltDAQPage";
+
 
 /* ---------------- 404 ---------------- */
 import NotFound from "./pages/NotFound";
@@ -87,6 +94,11 @@ export default function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/about" element={<AboutPage />} />
 
+        <Route
+  path="/solutions/daq"
+  element={<AbvoltDAQPage />}
+/>
+
         {/* ================= CORE DYNAMIC ROUTES ================= */}
      {/* ================= CORE DYNAMIC ROUTES ================= */}
 <Route path="/:divisionId" element={<DivisionPage />} />
@@ -108,6 +120,10 @@ export default function App() {
         <Route path="/shop" element={<ShopPage />} />
         <Route path="/shop/product/:id" element={<ProductDetailPage />} />
         <Route path="/shop/cart" element={<CartPage />} />
+
+
+        {/* ================= QUBI IDE ================= */}
+<Route path="/qubi" element={<QubiIDE />} />
 
         {/* ================= 404 ================= */}
         <Route path="*" element={<NotFound />} />

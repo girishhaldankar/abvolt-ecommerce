@@ -146,7 +146,7 @@ export default function CategoryForm() {
   }
 
   return (
-    <div className="max-w-xl mx-auto p-6 space-y-6 bg-gray-100">
+    <div className="max-w-xl mx-auto p-6 space-y-6 bg-gray-100 text-black">
       <h2 className="text-2xl font-bold">
         {categoryId && categoryId !== "new"
           ? "Edit Category"

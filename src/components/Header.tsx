@@ -1,251 +1,318 @@
-import { useState, useEffect } from "react";
-import { Menu, X, ChevronDown } from "lucide-react";
-import { Link } from "react-router-dom";
-import ThemeToggle from "./ThemeToggle";
-import AbvoltLogo from "./AbvoltLogo";
-import { getAllDivisions } from "../services/divisions.service";
+  import { useState, useEffect } from "react";
+  import { Menu, X, ChevronDown } from "lucide-react";
+  import * as LucideIcons from "lucide-react";
+  import { Link } from "react-router-dom";
+  import ThemeToggle from "./ThemeToggle";
+  import AbvoltLogo from "./AbvoltLogo";
+  import { getAllDivisions } from "../services/divisions.service";
 
-interface MenuItem {
-  name: string;
-  path?: string;
-  children?: MenuItem[];
-}
+  interface MenuItem {
+    name: string;
+    icon?: string;
+    path?: string;
+    children?: MenuItem[];
+  }
 
-const formatMenuLabel = (text: string) =>
-  text.charAt(0).toUpperCase() + text.slice(1);
+  const formatMenuLabel = (text: string) =>
+    text.charAt(0).toUpperCase() + text.slice(1);
 
-export function Header() {
-  const [scrolled, setScrolled] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [openDesktop, setOpenDesktop] = useState<Record<string, boolean>>({});
-  const [activeMenu, setActiveMenu] = useState<string | null>(null);
-  const [openMobile, setOpenMobile] = useState<Record<string, boolean>>({});
-  const [navItems, setNavItems] = useState<MenuItem[]>([]);
+  /* ---------------- ICON HELPER ---------------- */
+  const getIconComponent = (iconString?: string): any => {
+    if (!iconString) return "📋";
 
-  // Scroll detection
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 50);
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+    if (iconString.length <= 2) return iconString;
 
-  // Lock body scroll on mobile open
-  useEffect(() => {
-    document.body.style.overflow = mobileOpen ? "hidden" : "auto";
-  }, [mobileOpen]);
+    try {
+      const emojiRegex = /^[\p{Emoji}\s]+$/u;
+      if (emojiRegex.test(iconString)) return iconString;
+    } catch {}
 
-  // Load dynamic divisions
-  useEffect(() => {
-    getAllDivisions().then((divisions: any[]) => {
-      const divisionMenus: MenuItem[] = divisions.map((div) => ({
-        name: div.title,
-        children: div.audiences.map((aud: any) => ({
-          name: aud.title,
-          children: aud.streams.map((stream: any) => ({
-            name: stream.title,
-            children: stream.categories.map((cat: any) => ({
-              name: cat.title,
-              path: `/${div.id}/${aud.id}/stream/${stream.id}/${cat.id}`,
+    return (LucideIcons as any)[iconString] || "📋";
+  };
+
+  export function Header() {
+    const [scrolled, setScrolled] = useState(false);
+    const [mobileOpen, setMobileOpen] = useState(false);
+    const [activeMenu, setActiveMenu] = useState<string | null>(null);
+    const [navItems, setNavItems] = useState<MenuItem[]>([]);
+
+    const [level1, setLevel1] = useState<any>(null);
+    const [level2, setLevel2] = useState<any>(null);
+    const [level3, setLevel3] = useState<any>(null);
+
+    const [hoverTimeout, setHoverTimeout] = useState<any>(null);
+
+    useEffect(() => {
+      const onScroll = () => setScrolled(window.scrollY > 50);
+      window.addEventListener("scroll", onScroll);
+      return () => window.removeEventListener("scroll", onScroll);
+    }, []);
+
+    useEffect(() => {
+      document.body.style.overflow = mobileOpen ? "hidden" : "auto";
+    }, [mobileOpen]);
+
+    useEffect(() => {
+      getAllDivisions().then((divisions: any[]) => {
+        const divisionMenus: MenuItem[] = divisions.map((div) => ({
+          name: div.title,
+          children: div.audiences.map((aud: any) => ({
+            name: aud.title,
+            icon: aud.icon,
+            children: aud.streams.map((stream: any) => ({
+              name: stream.title,
+              children: stream.categories.map((cat: any) => ({
+                name: cat.title,
+                path: `/${div.id}/${aud.id}/stream/${stream.id}/${cat.id}`,
+              })),
             })),
           })),
-        })),
-      }));
+        }));
 
-      setNavItems([
-        { name: "Home", path: "/" },
-        ...divisionMenus,
-        { name: "Shop", path: "/shop" },
-        { name: "About", path: "/about" },
-        { name: "Contact", path: "/contact" },
-      ]);
-    });
-  }, []);
+        setNavItems([
+          { name: "Home", path: "/" },
+          ...divisionMenus,
+          { name: "Shop", path: "/shop" },
+          { name: "About", path: "/about" },
+          { name: "Contact", path: "/contact" },
+        ]);
+      });
+    }, []);
 
-  // Desktop recursive menu
-  const renderDesktopMenu = (
-    items: MenuItem[],
-    parentKey = "",
-    bgClass = "bg-white/30 dark:bg-slate-900/50"
-  ) =>
-    items.map((item, idx) => {
-      const key = parentKey + idx;
-      const isOpen = openDesktop[key];
-
-      return (
-        <div
-          key={key}
-          className="relative"
-          onMouseEnter={() => setOpenDesktop((p) => ({ ...p, [key]: true }))}
-          onMouseLeave={() => setOpenDesktop((p) => ({ ...p, [key]: false }))}
-        >
-          {item.children ? (
-            <div className="flex items-center justify-between px-4 py-2 cursor-pointer hover:bg-slate-800/50 rounded transition">
-              <span>{formatMenuLabel(item.name)}</span>
-              <ChevronDown size={12} />
-            </div>
-          ) : (
+    const renderMobileMenu = (items: MenuItem[]) =>
+      items.map((item, idx) => {
+        if (!item.children && item.path) {
+          return (
             <Link
-              to={item.path!}
-              className="block px-4 py-2 hover:bg-slate-800/50 rounded transition"
+              key={idx}
+              to={item.path}
+              className="block py-3 px-4 text-base text-white hover:bg-white/10"
+              onClick={() => setMobileOpen(false)}
             >
               {formatMenuLabel(item.name)}
             </Link>
-          )}
+          );
+        }
 
-          {item.children && isOpen && (
-            <div
-              className={`absolute top-0 left-full min-w-[220px]
-                ${bgClass} backdrop-blur-2xl backdrop-saturate-150
-                border border-white/20 dark:border-white/10
-                shadow-xl rounded-xl z-50`}
-            >
-              {renderDesktopMenu(item.children, key + "-", bgClass)}
-            </div>
-          )}
-        </div>
-      );
-    });
-
-  // Mobile recursive menu
-  const renderMobileMenu = (items: MenuItem[], parentKey = "") =>
-    items.map((item, idx) => {
-      const key = parentKey ? `${parentKey}-${idx}` : `${idx}`;
-      const isOpen = openMobile[key] || false;
-
-      if (!item.children && item.path) {
         return (
-          <Link
-            key={key}
-            to={item.path}
-            className="block px-4 py-2 text-sm rounded-md hover:bg-white/20 dark:hover:bg-white/10 transition"
-            onClick={() => setMobileOpen(false)}
-          >
-            {formatMenuLabel(item.name)}
-          </Link>
-        );
-      }
-
-      return (
-        <div key={key} className="ml-2">
-          <button
-            type="button"
-            className="w-full flex justify-between items-center px-2 py-2 text-left hover:bg-white/20 dark:hover:bg-white/10 transition"
-            onClick={() =>
-              setOpenMobile((p) => ({ ...p, [key]: !isOpen }))
-            }
-          >
-            <span>{formatMenuLabel(item.name)}</span>
-            <ChevronDown
-              size={14}
-              className={`transition-transform duration-300 ${
-                isOpen ? "rotate-180" : ""
-              }`}
-            />
-          </button>
-
-          {isOpen && (
-            <div className="ml-4 border-l border-white/20 transition-all duration-300">
-              {item.children && renderMobileMenu(item.children, key)}
+          <details key={idx} className="border-b border-white/10">
+            <summary className="py-3 px-4 cursor-pointer text-white">
+              {formatMenuLabel(item.name)}
+            </summary>
+            <div className="ml-4">
+              {item.children && renderMobileMenu(item.children)}
             </div>
-          )}
-        </div>
-      );
-    });
+          </details>
+        );
+      });
 
-  return (
-    <>
-      {/* Header wrapper WITHOUT blur */}
-      <header className="fixed top-0 left-0 w-full z-50">
-        {/* Glass container (blur applied here) */}
-        <div
-          className={`transition-all duration-500 ${
-            scrolled
-              ? "bg-white/20 dark:bg-slate-900/30 backdrop-blur-xl backdrop-saturate-150 shadow-md"
-              : "bg-white/0 backdrop-blur-0"
-          }`}
-        >
+    return (
+      <>
+        {activeMenu && (
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40"></div>
+        )}
+
+        <header className="fixed top-0 left-0 w-full z-50">
           <div
-            className={`relative container mx-auto px-6 flex items-center justify-between transition-all duration-300 ${
-              scrolled ? "h-16" : "h-20"
+            className={`transition-all duration-500 ${
+              scrolled
+                ? "bg-white/70 dark:bg-slate-900/30 backdrop-blur-xl shadow-md"
+                : ""
             }`}
           >
-            <Link to="/">
-              <AbvoltLogo className="w-40" />
-            </Link>
+            <div className="container mx-auto px-6 flex items-center justify-between h-16">
+              <Link to="/">
+                <AbvoltLogo className="w-36" />
+              </Link>
 
-            {/* Desktop Nav */}
-            <nav className="hidden md:flex space-x-8 text-sm">
-              {navItems.map((item) =>
-                !item.children ? (
-                  <Link
-                    key={item.name}
-                    to={item.path!}
-                    className="hover:text-cyan-500 transition"
-                  >
-                    {formatMenuLabel(item.name)}
-                  </Link>
-                ) : (
-                  <div
-                    key={item.name}
-                    className="relative"
-                    onMouseEnter={() => setActiveMenu(item.name)}
-                    onMouseLeave={() => setActiveMenu(null)}
-                  >
-                    <div className="flex items-center cursor-pointer">
-                      {formatMenuLabel(item.name)}
-                      <ChevronDown size={14} className="ml-1" />
-                    </div>
+              {/* ================= DESKTOP ================= */}
+              <nav className="hidden md:flex items-center space-x-8 text-sm relative z-50">
+                {navItems.map((item) =>
+                  !item.children ? (
+                    <Link
+                      key={item.name}
+                      to={item.path!}
+                      className="flex items-center h-16 relative group 
+                      text-gray-800 dark:text-white/80 
+                      hover:text-cyan-500 transition"
+                    >
+                      <span>{formatMenuLabel(item.name)}</span>
 
-                    {activeMenu === item.name && (
+                      <span className="absolute left-0 bottom-3 h-[2px] w-0 bg-cyan-400 transition-all duration-300 group-hover:w-full"></span>
+                    </Link>
+                  ) : (
+                    <div
+                      key={item.name}
+                      className="group flex items-center h-16"
+                      onMouseEnter={() => {
+                        clearTimeout(hoverTimeout);
+                        setActiveMenu(item.name);
+                        setLevel1(item.children?.[0]);
+                        setLevel2(item.children?.[0]?.children?.[0]);
+                        setLevel3(null);
+                      }}
+                      onMouseLeave={() => {
+                        const t = setTimeout(() => setActiveMenu(null), 150);
+                        setHoverTimeout(t);
+                      }}
+                    >
+                      {/* TOP */}
                       <div
-                        className="absolute left-1/2 top-full -translate-x-1/2 min-w-[240px]
-                          bg-slate-900/50
-                          backdrop-blur-2xl backdrop-saturate-150
-                          border border-white/20 dark:border-white/10
-                          shadow-xl rounded-xl z-50"
+                        className={`flex items-center h-16 cursor-pointer relative group transition ${
+                          activeMenu === item.name
+                            ? "text-cyan-500 drop-shadow-[0_0_6px_rgba(34,211,238,0.6)]"
+                            : "text-gray-800 dark:text-white/80 hover:text-cyan-500"
+                        }`}
                       >
-                        <div className="py-2">
-                          {renderDesktopMenu(item.children, "", "bg-slate-900/50")}
+                        <span className="flex items-center">
+                          {formatMenuLabel(item.name)}
+                          <ChevronDown size={14} className="ml-1 mt-[1px]" />
+                        </span>
+
+                        <span
+                          className={`absolute left-0 bottom-3 h-[2px] bg-cyan-400 transition-all duration-300 ${
+                            activeMenu === item.name
+                              ? "w-full"
+                              : "w-0 group-hover:w-full"
+                          }`}
+                        />
+                      </div>
+
+                      {/* 🔥 MEGA MENU — UNCHANGED */}
+                      <div
+                        className={`absolute left-0 top-full mt-4
+                        w-[950px] max-w-[calc(100vw-2rem)] max-h-[80vh]
+                        bg-slate-900/95 backdrop-blur-2xl rounded-xl shadow-2xl p-6
+                        overflow-visible
+                        transition-all duration-300 ${
+                          activeMenu === item.name
+                            ? "opacity-100 translate-y-0"
+                            : "opacity-0 translate-y-2 pointer-events-none"
+                        }`}
+                      >
+                        <div className="grid grid-cols-3 gap-6 px-2">
+
+                          {/* LEVEL 1 */}
+                          <div className="pl-2 pr-4 border-r border-white/10 max-h-[70vh] overflow-y-auto custom-scroll pb-6">
+                            <h4 className="text-xs uppercase text-white/60 mb-4">
+                              Audiences
+                            </h4>
+
+                            {item.children?.map((lvl1: any, i: number) => {
+                              const Icon = getIconComponent(lvl1.icon);
+
+                              return (
+                                <div
+                                  key={i}
+                                  onMouseEnter={() => {
+                                    setLevel1(lvl1);
+                                    setLevel2(lvl1.children?.[0]);
+                                    setLevel3(null);
+                                  }}
+                                  className={`flex items-center gap-3 px-3 py-2 rounded transition-all cursor-pointer ${
+                                    level1?.name === lvl1.name
+                                      ? "bg-white/15 text-white shadow-[0_0_8px_rgba(34,211,238,0.3)]"
+                                      : "hover:bg-white/5 text-white/80"
+                                  }`}
+                                >
+                                  <div className="w-5 h-5 flex items-center justify-center">
+                                    {typeof Icon === "string" ? (
+                                      <span>{Icon}</span>
+                                    ) : (
+                                      <Icon size={16} />
+                                    )}
+                                  </div>
+                                  {lvl1.name}
+                                </div>
+                              );
+                            })}
+                          </div>
+
+                          {/* LEVEL 2 */}
+                          <div className="pl-2 pr-4 border-r border-white/10 max-h-[70vh] overflow-y-auto custom-scroll pb-6">
+                            <h4 className="text-xs uppercase text-white/60 mb-4">
+                              Streams
+                            </h4>
+
+                            {level1?.children?.map((lvl2: any, i: number) => (
+                              <div
+                                key={i}
+                                onMouseEnter={() => {
+                                  setLevel2(lvl2);
+                                  setLevel3(null);
+                                }}
+                                className={`flex items-center gap-2 px-3 py-2 rounded transition-all cursor-pointer ${
+                                  level2?.name === lvl2.name
+                                    ? "bg-white/15 text-white shadow-[0_0_8px_rgba(34,211,238,0.3)]"
+                                    : "hover:bg-white/5 text-white/80"
+                                }`}
+                              >
+                                <span className="w-[3px] h-4 bg-cyan-400 opacity-70"></span>
+                                {lvl2.name}
+                              </div>
+                            ))}
+                          </div>
+
+                          {/* LEVEL 3 */}
+                          <div className="pl-2 pr-4 max-h-[70vh] overflow-y-auto overflow-x-hidden custom-scroll pb-6">
+                            <h4 className="text-xs uppercase text-white/60 mb-4">
+                              Categories
+                            </h4>
+
+                            {level2?.children?.map((lvl3: any, i: number) => (
+                              <Link
+                                key={i}
+                                to={lvl3.path}
+                                onMouseEnter={() => setLevel3(lvl3)}
+                                className={`flex items-center gap-2 px-3 py-2 rounded transition-all ${
+                                  level3?.name === lvl3.name
+                                    ? "bg-white/15 text-white shadow-[0_0_10px_rgba(34,211,238,0.4)]"
+                                    : "text-white/80 hover:text-white hover:bg-white/10"
+                                }`}
+                              >
+                                <span className="w-[3px] h-4 bg-cyan-400 opacity-70"></span>
+                                {lvl3.name}
+                              </Link>
+                            ))}
+                          </div>
+
                         </div>
                       </div>
-                    )}
-                  </div>
-                )
-              )}
-            </nav>
+                    </div>
+                  )
+                )}
+              </nav>
 
-            {/* Right side */}
-            <div className="flex items-center gap-4">
-              <ThemeToggle />
-              <button
-                className="md:hidden"
-                onClick={() => setMobileOpen(!mobileOpen)}
-              >
-                {mobileOpen ? <X /> : <Menu />}
-              </button>
+              {/* RIGHT */}
+              <div className="flex items-center gap-4">
+                <ThemeToggle />
+                <button
+                  className="md:hidden"
+                  onClick={() => setMobileOpen(!mobileOpen)}
+                >
+                  {mobileOpen ? <X /> : <Menu />}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Mobile Menu */}
-        <div
-          className={`md:hidden absolute top-full left-0 w-full
-            bg-white/30 dark:bg-slate-900/40
-            backdrop-blur-2xl backdrop-saturate-150
-            border-t border-white/20
-            shadow-xl
-            transition-all duration-300 ${
-              mobileOpen
-                ? "opacity-100 max-h-screen"
-                : "opacity-0 max-h-0 overflow-hidden"
+          {/* MOBILE */}
+          <div
+            className={`fixed top-0 left-0 h-full w-full bg-slate-900 z-50
+            transition-transform duration-300 ${
+              mobileOpen ? "translate-x-0" : "-translate-x-full"
             }`}
-        >
-          {renderMobileMenu(navItems)}
-        </div>
-      </header>
+          >
+            <div className="flex items-center justify-between p-4 border-b border-white/10">
+              <span className="font-semibold text-white">Menu</span>
+              <X className="text-white" onClick={() => setMobileOpen(false)} />
+            </div>
 
-      {/* Spacer */}
-      
-    </>
-  );
-}
+            <div className="overflow-y-auto h-full pb-20">
+              {renderMobileMenu(navItems)}
+            </div>
+          </div>
+        </header>
+      </>
+    );
+  }

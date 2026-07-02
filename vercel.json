@@ -4,7 +4,9 @@
     {
       "src": "package.json",
       "use": "@vercel/static-build",
-      "config": { "distDir": "dist" }
+      "config": {
+        "distDir": "dist"
+      }
     },
     {
       "src": "backend/server.ts",
@@ -12,14 +14,38 @@
     }
   ],
   "routes": [
-    { "src": "/api/(.*)", "dest": "/backend/server.ts" },
-    { "src": "/assets/(.*)", "dest": "/assets/$1" },
-    { "src": "/favicon.ico", "dest": "/favicon.ico" },
-    { "src": "/robots.txt", "dest": "/robots.txt" },
-    { "src": "/(.*)", "dest": "/index.html" }
-  ],
-  "env": {
-    "MONGO_URI": "mongodb+srv://abvolt_prod:Parth%401410@cluster0.l4qihln.mongodb.net/abvolt",
-    "PORT": "5000"
-  }
+    {
+      "src": "/api/(.*)",
+      "dest": "/backend/server.ts"
+    },
+
+    {
+      "src": "/qubi/(.*)",
+      "dest": "/qubi/$1"
+    },
+
+    {
+      "src": "/assets/(.*)",
+      "dest": "/assets/$1"
+    },
+
+    {
+      "src": "/favicon.ico",
+      "dest": "/favicon.ico"
+    },
+
+    {
+      "src": "/robots.txt",
+      "dest": "/robots.txt"
+    },
+
+    {
+      "handle": "filesystem"
+    },
+
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ]
 }

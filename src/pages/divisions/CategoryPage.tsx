@@ -150,7 +150,11 @@ export default function CategoryPage() {
           {/* Items */}
           {category?.items?.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {category.items.map((item: any) => (
+              {category.items
+                .sort((a: any, b: any) => 
+                  (a.code || '').localeCompare(b.code || '')
+                )
+                .map((item: any) => (
                 <div
                   key={item._id}
                   className="group relative rounded-2xl p-6 bg-[var(--glass-bg)]
@@ -173,7 +177,7 @@ export default function CategoryPage() {
                   </div>
 
                   <div className="space-y-3">
-                    <h2 className="text-lg font-semibold">{item.name}</h2>
+                    <h2 className="text-lg font-semibold">{item.title} </h2>
 
                     {item.code && (
                       <p className="text-xs uppercase opacity-60">
