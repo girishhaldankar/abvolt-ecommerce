@@ -1,67 +1,87 @@
-  import { useState, useEffect } from "react";
-  import { Menu, X, ChevronDown } from "lucide-react";
-  import * as LucideIcons from "lucide-react";
-  import { Link } from "react-router-dom";
-  import ThemeToggle from "./ThemeToggle";
-  import AbvoltLogo from "./AbvoltLogo";
-  import { getAllDivisions } from "../services/divisions.service";
 
-  interface MenuItem {
-    name: string;
-    icon?: string;
-    path?: string;
-    children?: MenuItem[];
+import { useState, useEffect } from "react";
+import { Menu, X, ChevronDown } from "lucide-react";
+import * as LucideIcons from "lucide-react";
+import { Link } from "react-router-dom";
+import ThemeToggle from "./ThemeToggle";
+import AbvoltLogo from "./AbvoltLogo";
+import { getAllDivisions } from "../services/divisions.service";
+
+interface MenuItem {
+  name: string;
+  icon?: string;
+  path?: string;
+  children?: MenuItem[];
+}
+
+interface HeaderProps {
+  forceScrolled?: boolean;
+}
+
+const formatMenuLabel = (text: string) =>
+  text.charAt(0).toUpperCase() + text.slice(1);
+
+/* ---------------- ICON HELPER ---------------- */
+const getIconComponent = (iconString?: string): any => {
+  if (!iconString) return "📋";
+
+  if (iconString.length <= 2) return iconString;
+
+  try {
+    const emojiRegex = /^[\p{Emoji}\s]+$/u;
+    if (emojiRegex.test(iconString)) return iconString;
+  } catch {
+    // Continue to Lucide icon lookup.
   }
 
-  const formatMenuLabel = (text: string) =>
-    text.charAt(0).toUpperCase() + text.slice(1);
+  return (LucideIcons as any)[iconString] || "📋";
+};
 
-  /* ---------------- ICON HELPER ---------------- */
-  const getIconComponent = (iconString?: string): any => {
-    if (!iconString) return "📋";
+export function Header({ forceScrolled = false }: HeaderProps) {
+  const [scrolled, setScrolled] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [activeMenu, setActiveMenu] = useState<string | null>(null);
+  const [navItems, setNavItems] = useState<MenuItem[]>([]);
 
-    if (iconString.length <= 2) return iconString;
+  const [level1, setLevel1] = useState<any>(null);
+  const [level2, setLevel2] = useState<any>(null);
+  const [level3, setLevel3] = useState<any>(null);
 
-    try {
-      const emojiRegex = /^[\p{Emoji}\s]+$/u;
-      if (emojiRegex.test(iconString)) return iconString;
-    } catch {}
+  const [hoverTimeout, setHoverTimeout] = useState<any>(null);
 
-    return (LucideIcons as any)[iconString] || "📋";
-  };
+  // Preserve the normal scroll behavior on every page.
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 50);
 
-  export function Header() {
-    const [scrolled, setScrolled] = useState(false);
-    const [mobileOpen, setMobileOpen] = useState(false);
-    const [activeMenu, setActiveMenu] = useState<string | null>(null);
-    const [navItems, setNavItems] = useState<MenuItem[]>([]);
+    window.addEventListener("scroll", onScroll);
 
-    const [level1, setLevel1] = useState<any>(null);
-    const [level2, setLevel2] = useState<any>(null);
-    const [level3, setLevel3] = useState<any>(null);
+    onScroll();
 
-    const [hoverTimeout, setHoverTimeout] = useState<any>(null);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
-    useEffect(() => {
-      const onScroll = () => setScrolled(window.scrollY > 50);
-      window.addEventListener("scroll", onScroll);
-      return () => window.removeEventListener("scroll", onScroll);
-    }, []);
+  // Category pages can show the scrolled header immediately.
+  const isScrolled = forceScrolled || scrolled;
 
-    useEffect(() => {
-      document.body.style.overflow = mobileOpen ? "hidden" : "auto";
-    }, [mobileOpen]);
+  useEffect(() => {
+    document.body.style.overflow = mobileOpen ? "hidden" : "auto";
 
-    useEffect(() => {
-      getAllDivisions().then((divisions: any[]) => {
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [mobileOpen]);
+
+  useEffect(() => {
+    getAllDivisions()
+      .then((divisions: any[]) => {
         const divisionMenus: MenuItem[] = divisions.map((div) => ({
           name: div.title,
-          children: div.audiences.map((aud: any) => ({
+          children: (div.audiences || []).map((aud: any) => ({
             name: aud.title,
             icon: aud.icon,
-            children: aud.streams.map((stream: any) => ({
+            children: (aud.streams || []).map((stream: any) => ({
               name: stream.title,
-              children: stream.categories.map((cat: any) => ({
+              children: (stream.categories || []).map((cat: any) => ({
                 name: cat.title,
                 path: `/${div.id}/${aud.id}/stream/${stream.id}/${cat.id}`,
               })),
@@ -76,243 +96,252 @@
           { name: "About", path: "/about" },
           { name: "Contact", path: "/contact" },
         ]);
+      })
+      .catch((error) => {
+        console.error("Failed to load navigation:", error);
       });
-    }, []);
+  }, []);
 
-    const renderMobileMenu = (items: MenuItem[]) =>
-      items.map((item, idx) => {
-        if (!item.children && item.path) {
-          return (
-            <Link
-              key={idx}
-              to={item.path}
-              className="block py-3 px-4 text-base text-white hover:bg-white/10"
-              onClick={() => setMobileOpen(false)}
-            >
-              {formatMenuLabel(item.name)}
-            </Link>
-          );
-        }
-
+  const renderMobileMenu = (items: MenuItem[]) =>
+    items.map((item, idx) => {
+      if (!item.children && item.path) {
         return (
-          <details key={idx} className="border-b border-white/10">
-            <summary className="py-3 px-4 cursor-pointer text-white">
-              {formatMenuLabel(item.name)}
-            </summary>
-            <div className="ml-4">
-              {item.children && renderMobileMenu(item.children)}
-            </div>
-          </details>
-        );
-      });
-
-    return (
-      <>
-        {activeMenu && (
-          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40"></div>
-        )}
-
-        <header className="fixed top-0 left-0 w-full z-50">
-          <div
-            className={`transition-all duration-500 ${
-              scrolled
-                ? "bg-white/70 dark:bg-slate-900/30 backdrop-blur-xl shadow-md"
-                : ""
-            }`}
+          <Link
+            key={`${item.name}-${idx}`}
+            to={item.path}
+            className="block px-4 py-3 text-base text-white hover:bg-white/10"
+            onClick={() => setMobileOpen(false)}
           >
-            <div className="container mx-auto px-6 flex items-center justify-between h-16">
-              <Link to="/">
-                <AbvoltLogo className="w-36" />
-              </Link>
+            {formatMenuLabel(item.name)}
+          </Link>
+        );
+      }
 
-              {/* ================= DESKTOP ================= */}
-              <nav className="hidden md:flex items-center space-x-8 text-sm relative z-50">
-                {navItems.map((item) =>
-                  !item.children ? (
-                    <Link
-                      key={item.name}
-                      to={item.path!}
-                      className="flex items-center h-16 relative group 
-                      text-gray-800 dark:text-white/80 
-                      hover:text-cyan-500 transition"
-                    >
-                      <span>{formatMenuLabel(item.name)}</span>
+      return (
+        <details key={`${item.name}-${idx}`} className="border-b border-white/10">
+          <summary className="cursor-pointer px-4 py-3 text-white">
+            {formatMenuLabel(item.name)}
+          </summary>
 
-                      <span className="absolute left-0 bottom-3 h-[2px] w-0 bg-cyan-400 transition-all duration-300 group-hover:w-full"></span>
-                    </Link>
-                  ) : (
+          <div className="ml-4">
+            {item.children && renderMobileMenu(item.children)}
+          </div>
+        </details>
+      );
+    });
+
+  return (
+    <>
+      {activeMenu && (
+        <div className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm" />
+      )}
+
+      <header className="fixed left-0 top-0 z-50 w-full">
+        <div
+          className={`transition-all duration-500 ${
+            isScrolled
+              ? "bg-white/90 shadow-md backdrop-blur-xl dark:bg-slate-900/90"
+              : ""
+          }`}
+        >
+          <div className="container mx-auto flex h-16 items-center justify-between px-6">
+            <Link to="/">
+              <AbvoltLogo className="w-36" />
+            </Link>
+
+            {/* ================= DESKTOP NAVIGATION ================= */}
+            <nav className="relative z-50 hidden items-center space-x-8 text-sm md:flex">
+              {navItems.map((item) =>
+                !item.children ? (
+                  <Link
+                    key={item.name}
+                    to={item.path!}
+                    className="group relative flex h-16 items-center text-gray-800 transition hover:text-cyan-500 dark:text-white/80"
+                  >
+                    <span>{formatMenuLabel(item.name)}</span>
+
+                    <span className="absolute bottom-3 left-0 h-[2px] w-0 bg-cyan-400 transition-all duration-300 group-hover:w-full" />
+                  </Link>
+                ) : (
+                  <div
+                    key={item.name}
+                    className="group flex h-16 items-center"
+                    onMouseEnter={() => {
+                      clearTimeout(hoverTimeout);
+                      setActiveMenu(item.name);
+                      setLevel1(item.children?.[0]);
+                      setLevel2(item.children?.[0]?.children?.[0]);
+                      setLevel3(null);
+                    }}
+                    onMouseLeave={() => {
+                      const timeout = setTimeout(
+                        () => setActiveMenu(null),
+                        150
+                      );
+                      setHoverTimeout(timeout);
+                    }}
+                  >
+                    {/* TOP MENU ITEM */}
                     <div
-                      key={item.name}
-                      className="group flex items-center h-16"
-                      onMouseEnter={() => {
-                        clearTimeout(hoverTimeout);
-                        setActiveMenu(item.name);
-                        setLevel1(item.children?.[0]);
-                        setLevel2(item.children?.[0]?.children?.[0]);
-                        setLevel3(null);
-                      }}
-                      onMouseLeave={() => {
-                        const t = setTimeout(() => setActiveMenu(null), 150);
-                        setHoverTimeout(t);
-                      }}
+                      className={`relative flex h-16 cursor-pointer items-center transition ${
+                        activeMenu === item.name
+                          ? "text-cyan-500 drop-shadow-[0_0_6px_rgba(34,211,238,0.6)]"
+                          : "text-gray-800 hover:text-cyan-500 dark:text-white/80"
+                      }`}
                     >
-                      {/* TOP */}
-                      <div
-                        className={`flex items-center h-16 cursor-pointer relative group transition ${
+                      <span className="flex items-center">
+                        {formatMenuLabel(item.name)}
+                        <ChevronDown size={14} className="ml-1 mt-[1px]" />
+                      </span>
+
+                      <span
+                        className={`absolute bottom-3 left-0 h-[2px] bg-cyan-400 transition-all duration-300 ${
                           activeMenu === item.name
-                            ? "text-cyan-500 drop-shadow-[0_0_6px_rgba(34,211,238,0.6)]"
-                            : "text-gray-800 dark:text-white/80 hover:text-cyan-500"
+                            ? "w-full"
+                            : "w-0 group-hover:w-full"
                         }`}
-                      >
-                        <span className="flex items-center">
-                          {formatMenuLabel(item.name)}
-                          <ChevronDown size={14} className="ml-1 mt-[1px]" />
-                        </span>
+                      />
+                    </div>
 
-                        <span
-                          className={`absolute left-0 bottom-3 h-[2px] bg-cyan-400 transition-all duration-300 ${
-                            activeMenu === item.name
-                              ? "w-full"
-                              : "w-0 group-hover:w-full"
-                          }`}
-                        />
-                      </div>
+                    {/* MEGA MENU */}
+                    <div
+                      className={`absolute left-0 top-full mt-4 max-h-[80vh] w-[950px] max-w-[calc(100vw-2rem)] overflow-visible rounded-xl bg-slate-900/95 p-6 shadow-2xl backdrop-blur-2xl transition-all duration-300 ${
+                        activeMenu === item.name
+                          ? "translate-y-0 opacity-100"
+                          : "pointer-events-none translate-y-2 opacity-0"
+                      }`}
+                    >
+                      <div className="grid grid-cols-3 gap-6 px-2">
+                        {/* LEVEL 1 */}
+                        <div className="custom-scroll max-h-[70vh] overflow-y-auto border-r border-white/10 pb-6 pl-2 pr-4">
+                          <h4 className="mb-4 text-xs uppercase text-white/60">
+                            Audiences
+                          </h4>
 
-                      {/* 🔥 MEGA MENU — UNCHANGED */}
-                      <div
-                        className={`absolute left-0 top-full mt-4
-                        w-[950px] max-w-[calc(100vw-2rem)] max-h-[80vh]
-                        bg-slate-900/95 backdrop-blur-2xl rounded-xl shadow-2xl p-6
-                        overflow-visible
-                        transition-all duration-300 ${
-                          activeMenu === item.name
-                            ? "opacity-100 translate-y-0"
-                            : "opacity-0 translate-y-2 pointer-events-none"
-                        }`}
-                      >
-                        <div className="grid grid-cols-3 gap-6 px-2">
+                          {item.children?.map((lvl1: any, i: number) => {
+                            const Icon = getIconComponent(lvl1.icon);
 
-                          {/* LEVEL 1 */}
-                          <div className="pl-2 pr-4 border-r border-white/10 max-h-[70vh] overflow-y-auto custom-scroll pb-6">
-                            <h4 className="text-xs uppercase text-white/60 mb-4">
-                              Audiences
-                            </h4>
-
-                            {item.children?.map((lvl1: any, i: number) => {
-                              const Icon = getIconComponent(lvl1.icon);
-
-                              return (
-                                <div
-                                  key={i}
-                                  onMouseEnter={() => {
-                                    setLevel1(lvl1);
-                                    setLevel2(lvl1.children?.[0]);
-                                    setLevel3(null);
-                                  }}
-                                  className={`flex items-center gap-3 px-3 py-2 rounded transition-all cursor-pointer ${
-                                    level1?.name === lvl1.name
-                                      ? "bg-white/15 text-white shadow-[0_0_8px_rgba(34,211,238,0.3)]"
-                                      : "hover:bg-white/5 text-white/80"
-                                  }`}
-                                >
-                                  <div className="w-5 h-5 flex items-center justify-center">
-                                    {typeof Icon === "string" ? (
-                                      <span>{Icon}</span>
-                                    ) : (
-                                      <Icon size={16} />
-                                    )}
-                                  </div>
-                                  {lvl1.name}
-                                </div>
-                              );
-                            })}
-                          </div>
-
-                          {/* LEVEL 2 */}
-                          <div className="pl-2 pr-4 border-r border-white/10 max-h-[70vh] overflow-y-auto custom-scroll pb-6">
-                            <h4 className="text-xs uppercase text-white/60 mb-4">
-                              Streams
-                            </h4>
-
-                            {level1?.children?.map((lvl2: any, i: number) => (
+                            return (
                               <div
                                 key={i}
                                 onMouseEnter={() => {
-                                  setLevel2(lvl2);
+                                  setLevel1(lvl1);
+                                  setLevel2(lvl1.children?.[0]);
                                   setLevel3(null);
                                 }}
-                                className={`flex items-center gap-2 px-3 py-2 rounded transition-all cursor-pointer ${
-                                  level2?.name === lvl2.name
+                                className={`flex cursor-pointer items-center gap-3 rounded px-3 py-2 transition-all ${
+                                  level1?.name === lvl1.name
                                     ? "bg-white/15 text-white shadow-[0_0_8px_rgba(34,211,238,0.3)]"
-                                    : "hover:bg-white/5 text-white/80"
+                                    : "text-white/80 hover:bg-white/5"
                                 }`}
                               >
-                                <span className="w-[3px] h-4 bg-cyan-400 opacity-70"></span>
-                                {lvl2.name}
+                                <div className="flex h-5 w-5 items-center justify-center">
+                                  {typeof Icon === "string" ? (
+                                    <span>{Icon}</span>
+                                  ) : (
+                                    <Icon size={16} />
+                                  )}
+                                </div>
+
+                                {lvl1.name}
                               </div>
-                            ))}
-                          </div>
+                            );
+                          })}
+                        </div>
 
-                          {/* LEVEL 3 */}
-                          <div className="pl-2 pr-4 max-h-[70vh] overflow-y-auto overflow-x-hidden custom-scroll pb-6">
-                            <h4 className="text-xs uppercase text-white/60 mb-4">
-                              Categories
-                            </h4>
+                        {/* LEVEL 2 */}
+                        <div className="custom-scroll max-h-[70vh] overflow-y-auto border-r border-white/10 pb-6 pl-2 pr-4">
+                          <h4 className="mb-4 text-xs uppercase text-white/60">
+                            Streams
+                          </h4>
 
-                            {level2?.children?.map((lvl3: any, i: number) => (
-                              <Link
-                                key={i}
-                                to={lvl3.path}
-                                onMouseEnter={() => setLevel3(lvl3)}
-                                className={`flex items-center gap-2 px-3 py-2 rounded transition-all ${
-                                  level3?.name === lvl3.name
-                                    ? "bg-white/15 text-white shadow-[0_0_10px_rgba(34,211,238,0.4)]"
-                                    : "text-white/80 hover:text-white hover:bg-white/10"
-                                }`}
-                              >
-                                <span className="w-[3px] h-4 bg-cyan-400 opacity-70"></span>
-                                {lvl3.name}
-                              </Link>
-                            ))}
-                          </div>
+                          {level1?.children?.map((lvl2: any, i: number) => (
+                            <div
+                              key={i}
+                              onMouseEnter={() => {
+                                setLevel2(lvl2);
+                                setLevel3(null);
+                              }}
+                              className={`flex cursor-pointer items-center gap-2 rounded px-3 py-2 transition-all ${
+                                level2?.name === lvl2.name
+                                  ? "bg-white/15 text-white shadow-[0_0_8px_rgba(34,211,238,0.3)]"
+                                  : "text-white/80 hover:bg-white/5"
+                              }`}
+                            >
+                              <span className="h-4 w-[3px] bg-cyan-400 opacity-70" />
+                              {lvl2.name}
+                            </div>
+                          ))}
+                        </div>
 
+                        {/* LEVEL 3 */}
+                        <div className="custom-scroll max-h-[70vh] overflow-x-hidden overflow-y-auto pb-6 pl-2 pr-4">
+                          <h4 className="mb-4 text-xs uppercase text-white/60">
+                            Categories
+                          </h4>
+
+                          {level2?.children?.map((lvl3: any, i: number) => (
+                            <Link
+                              key={i}
+                              to={lvl3.path}
+                              onMouseEnter={() => setLevel3(lvl3)}
+                              className={`flex items-center gap-2 rounded px-3 py-2 transition-all ${
+                                level3?.name === lvl3.name
+                                  ? "bg-white/15 text-white shadow-[0_0_10px_rgba(34,211,238,0.4)]"
+                                  : "text-white/80 hover:bg-white/10 hover:text-white"
+                              }`}
+                            >
+                              <span className="h-4 w-[3px] bg-cyan-400 opacity-70" />
+                              {lvl3.name}
+                            </Link>
+                          ))}
                         </div>
                       </div>
                     </div>
-                  )
-                )}
-              </nav>
+                  </div>
+                )
+              )}
+            </nav>
 
-              {/* RIGHT */}
-              <div className="flex items-center gap-4">
-                <ThemeToggle />
-                <button
-                  className="md:hidden"
-                  onClick={() => setMobileOpen(!mobileOpen)}
-                >
-                  {mobileOpen ? <X /> : <Menu />}
-                </button>
-              </div>
+            {/* RIGHT SIDE */}
+            <div className="flex items-center gap-4">
+              <ThemeToggle />
+
+              <button
+                type="button"
+                aria-label={mobileOpen ? "Close menu" : "Open menu"}
+                className="md:hidden"
+                onClick={() => setMobileOpen(!mobileOpen)}
+              >
+                {mobileOpen ? <X /> : <Menu />}
+              </button>
             </div>
           </div>
+        </div>
 
-          {/* MOBILE */}
-          <div
-            className={`fixed top-0 left-0 h-full w-full bg-slate-900 z-50
-            transition-transform duration-300 ${
-              mobileOpen ? "translate-x-0" : "-translate-x-full"
-            }`}
-          >
-            <div className="flex items-center justify-between p-4 border-b border-white/10">
-              <span className="font-semibold text-white">Menu</span>
-              <X className="text-white" onClick={() => setMobileOpen(false)} />
-            </div>
+        {/* MOBILE MENU */}
+        <div
+          className={`fixed left-0 top-0 z-50 h-full w-full bg-slate-900 transition-transform duration-300 ${
+            mobileOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
+        >
+          <div className="flex items-center justify-between border-b border-white/10 p-4">
+            <span className="font-semibold text-white">Menu</span>
 
-            <div className="overflow-y-auto h-full pb-20">
-              {renderMobileMenu(navItems)}
-            </div>
+            <button
+              type="button"
+              aria-label="Close menu"
+              onClick={() => setMobileOpen(false)}
+            >
+              <X className="text-white" />
+            </button>
           </div>
-        </header>
-      </>
-    );
-  }
+
+          <div className="h-full overflow-y-auto pb-20">
+            {renderMobileMenu(navItems)}
+          </div>
+        </div>
+      </header>
+    </>
+  );
+}

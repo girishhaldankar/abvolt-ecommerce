@@ -154,19 +154,17 @@ export default function AnalogTab({
         </div>
 
         <div className="bg-[#1c2333] border border-slate-700 rounded-xl p-8">
-          <div className="flex items-end gap-4">
-            <div className="text-6xl font-bold font-mono text-blue-400">
-              {freqValue ?? "--"}
-            </div>
+          <div className="flex items-center gap-2">
+  <div className="text-6xl font-bold font-mono  leading-none">
+    {freqValue ?? "--"}
+  </div>
 
-            <div className="text-xl text-slate-400">
-              Hz
-            </div>
-          </div>
+  <div className="text-lg text-slate-400">
+    Hz
+  </div>
+</div>
 
-          <p className="text-slate-500 mt-2">
-            Waiting for signal...
-          </p>
+          
         </div>
       </div>
     </div>

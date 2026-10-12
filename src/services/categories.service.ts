@@ -1,4 +1,12 @@
+
 import { apiFetch } from "./api";
+
+export type CategoryData = {
+  title?: string;
+  description?: string;
+  icon?: string;
+  image?: string;
+};
 
 export const addCategory = (
   divisionId: string,
@@ -8,6 +16,7 @@ export const addCategory = (
     title: string;
     description?: string;
     icon?: string;
+    image?: string;
   }
 ) => {
   return apiFetch(
@@ -24,11 +33,7 @@ export const updateCategory = (
   audienceId: string,
   streamId: string,
   categoryId: string,
-  data: {
-    title?: string;
-    description?: string;
-    icon?: string;
-  }
+  data: CategoryData
 ) => {
   return apiFetch(
     `/divisions/${divisionId}/audiences/${audienceId}/streams/${streamId}/categories/${categoryId}`,

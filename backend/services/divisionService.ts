@@ -1,3 +1,4 @@
+
 import { Division } from "../models/Division";
 
 /* =========================================================
@@ -25,13 +26,19 @@ export const createDivision = async (data: {
 
 export const updateDivision = async (
   divisionId: string,
-  data: { title?: string; description?: string; icon?: string; color?: string }
+  data: {
+    title?: string;
+    description?: string;
+    icon?: string;
+    color?: string;
+  }
 ) => {
   const division = await Division.findById(divisionId);
   if (!division) throw new Error("Division not found");
 
   Object.assign(division, data);
   await division.save();
+
   return { ...division.toObject(), id: division._id.toString() };
 };
 
@@ -123,6 +130,7 @@ export const addAudience = async (
   await division.save();
 
   const audience = division.audiences[division.audiences.length - 1];
+
   return { ...audience.toObject(), id: audience._id.toString() };
 };
 
@@ -177,6 +185,7 @@ export const addStream = async (
   await division.save();
 
   const stream = audience.streams[audience.streams.length - 1];
+
   return { ...stream.toObject(), id: stream._id.toString() };
 };
 
@@ -192,6 +201,7 @@ export const updateStream = async (
   const stream = division.audiences
     .id(audienceId)
     ?.streams.id(streamId);
+
   if (!stream) throw new Error("Stream not found");
 
   Object.assign(stream, data);
@@ -227,7 +237,12 @@ export const addCategory = async (
   divisionId: string,
   audienceId: string,
   streamId: string,
-  data: { title: string; description?: string; icon?: string }
+  data: {
+    title: string;
+    description?: string;
+    icon?: string;
+    image?: string;
+  }
 ) => {
   const division = await Division.findById(divisionId);
   if (!division) throw new Error("Division not found");
@@ -235,13 +250,25 @@ export const addCategory = async (
   const stream = division.audiences
     .id(audienceId)
     ?.streams.id(streamId);
+
   if (!stream) throw new Error("Stream not found");
 
-  stream.categories.push({ ...data, items: [] });
+  stream.categories.push({
+    title: data.title,
+    description: data.description || "",
+    icon: data.icon || "Folder",
+    image: data.image || "",
+    items: [],
+  });
+
   await division.save();
 
   const category = stream.categories[stream.categories.length - 1];
-  return { ...category.toObject(), id: category._id.toString() };
+
+  return {
+    ...category.toObject(),
+    id: category._id.toString(),
+  };
 };
 
 export const updateCategory = async (
@@ -249,7 +276,12 @@ export const updateCategory = async (
   audienceId: string,
   streamId: string,
   categoryId: string,
-  data: { title?: string; description?: string; icon?: string }
+  data: {
+    title?: string;
+    description?: string;
+    icon?: string;
+    image?: string;
+  }
 ) => {
   const division = await Division.findById(divisionId);
   if (!division) throw new Error("Division not found");
@@ -257,15 +289,32 @@ export const updateCategory = async (
   const stream = division.audiences
     .id(audienceId)
     ?.streams.id(streamId);
+
   if (!stream) throw new Error("Stream not found");
 
   const category = stream.categories.id(categoryId);
   if (!category) throw new Error("Category not found");
 
-  Object.assign(category, data);
+  // Update only fields provided by the client.
+  // An omitted image field will preserve the existing image.
+  if (data.title !== undefined) category.title = data.title;
+
+  if (data.description !== undefined) {
+    category.description = data.description;
+  }
+
+  if (data.icon !== undefined) category.icon = data.icon;
+
+  if (data.image !== undefined) {
+    category.image = data.image;
+  }
+
   await division.save();
 
-  return { ...category.toObject(), id: category._id.toString() };
+  return {
+    ...category.toObject(),
+    id: category._id.toString(),
+  };
 };
 
 export const deleteCategory = async (
@@ -280,6 +329,7 @@ export const deleteCategory = async (
   const stream = division.audiences
     .id(audienceId)
     ?.streams.id(streamId);
+
   if (!stream) throw new Error("Stream not found");
 
   const category = stream.categories.id(categoryId);
@@ -316,12 +366,14 @@ export const addItem = async (
     .id(audienceId)
     ?.streams.id(streamId)
     ?.categories.id(categoryId);
+
   if (!category) throw new Error("Category not found");
 
   category.items.push(data);
   await division.save();
 
   const item = category.items[category.items.length - 1];
+
   return { ...item.toObject(), id: item._id.toString() };
 };
 
@@ -340,6 +392,7 @@ export const updateItem = async (
     .id(audienceId)
     ?.streams.id(streamId)
     ?.categories.id(categoryId);
+
   if (!category) throw new Error("Category not found");
 
   const item = category.items.id(itemId);
@@ -365,6 +418,7 @@ export const deleteItem = async (
     .id(audienceId)
     ?.streams.id(streamId)
     ?.categories.id(categoryId);
+
   if (!category) throw new Error("Category not found");
 
   const item = category.items.id(itemId);
@@ -408,6 +462,7 @@ export const getCategoryViewData = async (
     title: category.title,
     description: category.description,
     icon: category.icon,
+    image: category.image || "",
     items: category.items.map((item: any) => ({
       ...item,
       id: item._id.toString(),

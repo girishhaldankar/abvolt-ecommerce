@@ -1,4 +1,5 @@
 // server.ts
+import dns from "dns";
 import express, { Request, Response, NextFunction } from "express";
 import mongoose from "mongoose";
 import cors from "cors";
@@ -6,6 +7,9 @@ import dotenv from "dotenv";
 import "express-async-errors";
 
 import divisionRoutes from "./routes/divisionRoutes";
+
+// Use Google DNS for MongoDB SRV resolution
+dns.setServers(["8.8.8.8", "8.8.4.4"]);
 
 dotenv.config();
 
@@ -34,10 +38,14 @@ const MONGO_URI = process.env.MONGO_URI;
 if (!MONGO_URI) throw new Error("MONGO_URI not found in environment variables");
 
 // Cached connection for Vercel serverless
-let cached: { conn: typeof mongoose | null; promise: Promise<typeof mongoose> | null } = (globalThis as any)._mongoCached || {
+let cached: {
+  conn: typeof mongoose | null;
+  promise: Promise<typeof mongoose> | null;
+} = (globalThis as any)._mongoCached || {
   conn: null,
   promise: null,
 };
+
 (globalThis as any)._mongoCached = cached;
 
 export async function connectDB() {
@@ -45,6 +53,7 @@ export async function connectDB() {
 
   if (!cached.promise) {
     console.log("Connecting to MongoDB...");
+
     cached.promise = mongoose
       .connect(MONGO_URI)
       .then((mongoose) => {
@@ -71,6 +80,7 @@ if (!process.env.VERCEL) {
 
 /* ------------------- START SERVER (LOCAL ONLY) ------------------- */
 const PORT = process.env.PORT || 5000;
+
 if (!process.env.VERCEL) {
   app.listen(PORT, () => {
     console.log(`🚀 Server running on http://localhost:${PORT}`);

@@ -27,19 +27,25 @@ export default function StreamForm() {
      LOAD STREAM (EDIT)
   ===================== */
   useEffect(() => {
-    if (!divisionId || !audienceId || !streamId || streamId === "new") return;
+    if (!divisionId || !audienceId || !streamId || streamId === "new") {
+      return;
+    }
 
     setIsLoading(true);
+
     getDivisionById(divisionId)
       .then((division: any) => {
         const audience = division?.audiences?.find(
           (a: any) => String(a._id) === String(audienceId)
         );
+
         const stream = audience?.streams?.find(
           (s: any) => String(s._id) === String(streamId)
         );
 
-        if (!stream) throw new Error("Stream not found");
+        if (!stream) {
+          throw new Error("Stream not found");
+        }
 
         setTitle(stream.title || "");
         setDescription(stream.description || "");
@@ -54,7 +60,11 @@ export default function StreamForm() {
   ===================== */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim()) return alert("Title is required");
+
+    if (!title.trim()) {
+      alert("Title is required");
+      return;
+    }
 
     try {
       setIsSaving(true);
@@ -67,7 +77,6 @@ export default function StreamForm() {
       };
 
       if (streamId && streamId !== "new") {
-        // ✅ UPDATE
         await updateStream(
           divisionId!,
           audienceId!,
@@ -75,7 +84,6 @@ export default function StreamForm() {
           payload
         );
       } else {
-        // ✅ ADD
         await addStream(
           divisionId!,
           audienceId!,
@@ -92,7 +100,8 @@ export default function StreamForm() {
     }
   };
 
-  const PreviewIcon = (Icons as any)[icon] || Icons[DEFAULT_STREAM_ICON];
+  const PreviewIcon =
+    (Icons as any)[icon] || Icons[DEFAULT_STREAM_ICON];
 
   const filteredIcons = icon
     ? LUCIDE_ICON_NAMES.filter((name) =>
@@ -101,17 +110,23 @@ export default function StreamForm() {
     : [];
 
   if (isLoading) {
-    return <div className="p-6 text-center">Loading stream data…</div>;
+    return (
+      <div className="p-6 text-center text-gray-900">
+        Loading stream data…
+      </div>
+    );
   }
 
   return (
-    <div className="max-w-xl mx-auto p-6 space-y-6 bg-gray-100">
-      <h2 className="text-2xl font-bold">
+    <div className="mx-auto max-w-xl space-y-6 rounded-xl bg-gray-100 p-6 text-gray-900">
+      {/* PAGE TITLE */}
+      <h2 className="text-2xl font-bold text-gray-900">
         {streamId && streamId !== "new" ? "Edit Stream" : "Add Stream"}
       </h2>
 
+      {/* ERROR MESSAGE */}
       {error && (
-        <div className="p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+        <div className="rounded border border-red-300 bg-red-100 p-4 text-red-700">
           {error}
         </div>
       )}
@@ -119,20 +134,30 @@ export default function StreamForm() {
       <form className="space-y-4" onSubmit={handleSubmit}>
         {/* TITLE */}
         <div>
-          <label className="block mb-1 font-medium">Title *</label>
+          <label className="mb-1 block font-medium text-gray-800">
+            Title *
+          </label>
+
           <input
-            className="w-full p-2 border rounded"
+            type="text"
+            className="w-full rounded border border-gray-300 bg-white p-2 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-gray-200"
+            placeholder="Enter stream title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             disabled={isSaving}
+            required
           />
         </div>
 
         {/* DESCRIPTION */}
         <div>
-          <label className="block mb-1 font-medium">Description</label>
+          <label className="mb-1 block font-medium text-gray-800">
+            Description
+          </label>
+
           <textarea
-            className="w-full p-2 border rounded"
+            className="w-full rounded border border-gray-300 bg-white p-2 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-gray-200"
+            placeholder="Enter stream description"
             rows={3}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
@@ -142,51 +167,68 @@ export default function StreamForm() {
 
         {/* ICON */}
         <div>
-          <label className="block mb-1 font-medium">Lucide Icon</label>
+          <label className="mb-1 block font-medium text-gray-800">
+            Lucide Icon
+          </label>
+
           <div className="relative">
             <div className="flex gap-3">
               <input
-                className="flex-1 p-2 border rounded"
+                type="text"
+                className="min-w-0 flex-1 rounded border border-gray-300 bg-white p-2 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-gray-200"
+                placeholder="Search icon name"
                 value={icon}
                 onChange={(e) => {
                   setIcon(e.target.value);
                   setShowIconDropdown(true);
                 }}
                 onFocus={() => setShowIconDropdown(true)}
-                onBlur={() => setTimeout(() => setShowIconDropdown(false), 150)}
+                onBlur={() =>
+                  setTimeout(() => setShowIconDropdown(false), 150)
+                }
                 disabled={isSaving}
               />
-              <div className="w-16 h-12 border rounded flex items-center justify-center">
+
+              <div className="flex h-12 w-16 shrink-0 items-center justify-center rounded border border-gray-300 bg-white text-gray-900">
                 <PreviewIcon size={26} />
               </div>
             </div>
 
+            {/* ICON SUGGESTIONS */}
             {showIconDropdown && filteredIcons.length > 0 && (
-              <div className="absolute z-50 mt-1 w-full max-h-56 overflow-auto rounded border shadow-lg bg-white">
+              <div className="absolute z-50 mt-1 max-h-56 w-full overflow-auto rounded border border-gray-300 bg-white text-gray-900 shadow-lg">
                 {filteredIcons.map((name) => {
                   const IconItem = (Icons as any)[name];
+
                   return (
-                    <div
+                    <button
                       key={name}
+                      type="button"
+                      onMouseDown={(e) => e.preventDefault()}
                       onClick={() => {
                         setIcon(name);
                         setShowIconDropdown(false);
                       }}
-                      className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-gray-200"
+                      className="flex w-full items-center gap-3 px-3 py-2 text-left text-gray-900 transition hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
                     >
                       <IconItem size={18} />
                       <span className="text-sm">{name}</span>
-                    </div>
+                    </button>
                   );
                 })}
               </div>
             )}
           </div>
+
+          <p className="mt-1 text-xs text-gray-500">
+            Type an icon name, such as Folder, BookOpen, or Code.
+          </p>
         </div>
 
+        {/* SAVE BUTTON */}
         <button
           type="submit"
-          className="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400 font-medium"
+          className="w-full rounded bg-blue-600 px-4 py-2 font-medium text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-gray-400"
           disabled={isSaving}
         >
           {isSaving ? "Saving..." : "Save Stream"}

@@ -13,6 +13,7 @@ import WhyChooseUsSection from "../components/WhyChooseUsSection";
 import GlowBackground from "../components/ui/GlowBackground";
 import aboutImage from "../assets/microchip.jpg";
 import divisionImage from "../assets/microchip.jpg";
+import QubiSection from "../components/QubiSection";
 
 
 import { motion } from "framer-motion";
@@ -115,6 +116,11 @@ export default function HomePage() {
   </div>
 
 </motion.div>
+
+
+{/* ================= QUBI ================= */}
+
+<QubiSection />
 
         {/* About Section with Glow */}
         

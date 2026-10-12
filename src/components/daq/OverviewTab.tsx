@@ -4,13 +4,13 @@ interface Props {
 
 export default function OverviewTab({ daq }: Props) {
   return (
-    <div className="space-y-8 p-6">
+   <div className="space-y-6 p-5">
 
       {/* ================= SUMMARY ================= */}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
 
-        <div className="bg-[#1c2333] rounded-xl p-6">
+        <div className="bg-[#1c2333] border border-slate-700 rounded-xl p-4">
           <h3 className="text-gray-400 text-sm">
             Digital Inputs
           </h3>
@@ -20,7 +20,7 @@ export default function OverviewTab({ daq }: Props) {
           </div>
         </div>
 
-        <div className="bg-[#1c2333] rounded-xl p-6">
+        <div className="bg-[#1c2333] border border-slate-700 rounded-xl p-4">
           <h3 className="text-gray-400 text-sm">
             Digital Outputs
           </h3>
@@ -30,28 +30,30 @@ export default function OverviewTab({ daq }: Props) {
           </div>
         </div>
 
-        <div className="bg-[#1c2333] rounded-xl p-6">
+        <div className="bg-[#1c2333] border border-slate-700 rounded-xl p-4">
           <h3 className="text-gray-400 text-sm">
             Frequency
           </h3>
 
-          <div className="text-4xl font-bold mt-2 text-cyan-400">
-            {daq.freqValue !== null
-              ? daq.freqValue.toFixed(2)
-              : "--"}
-          </div>
+          <div className="flex items-center gap-2">
+  <div className="text-4xl font-bold  leading-none">
+    {daq.freqValue !== null
+      ? daq.freqValue.toFixed(2)
+      : "--"}
+  </div>
 
-          <div className="text-sm text-gray-500 mt-2">
-            Hz
-          </div>
+  <div className="text-sm font-medium uppercase tracking-wide text-gray-500">
+    Hz
+  </div>
+</div>
         </div>
 
-        <div className="bg-[#1c2333] rounded-xl p-6">
-          <h3 className="text-gray-400 text-sm">
+        <div className="bg-[#1c2333] border border-slate-700 rounded-xl p-4">
+          <h3 className="text-xs uppercase tracking-wide text-slate-500 font-medium">
             RX Count
           </h3>
 
-          <div className="text-4xl font-bold mt-2">
+          <div className="text-3xl font-bold font-mono mt-1">
             {daq.rxCount}
           </div>
         </div>
@@ -62,7 +64,7 @@ export default function OverviewTab({ daq }: Props) {
 
       <div>
 
-        <h2 className="text-xl font-semibold mb-4">
+        <h2 className="text-lg font-semibold text-white mb-3">
           Digital Inputs
         </h2>
 
@@ -72,17 +74,17 @@ export default function OverviewTab({ daq }: Props) {
             (value: number, index: number) => (
               <div
                 key={index}
-                className={`rounded-xl border transition-all duration-300 p-5 text-center ${
+                className={`rounded-xl border transition-all duration-300 p-3 text-center ${
                   value
                     ? "bg-green-600 border-green-400"
                     : "bg-[#1c2333] border-gray-700"
                 }`}
               >
-                <div className="text-gray-400 text-sm">
+                <div className="text-xs uppercase tracking-wide text-slate-500">
                   X{index}
                 </div>
 
-                <div className="text-2xl font-bold mt-2">
+                <div className="text-lg font-semibold mt-1">
                   {value ? "HIGH" : "LOW"}
                 </div>
               </div>
@@ -101,27 +103,27 @@ export default function OverviewTab({ daq }: Props) {
           Analog Inputs
         </h2>
 
-        <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-6">
+        <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-4">
 
           {daq.aiValues.map(
             (value: number, index: number) => (
               <div
                 key={index}
-                className="bg-[#1c2333] rounded-xl p-5"
+                className="bg-[#1c2333] border border-slate-700 rounded-xl p-4"
               >
                 <div className="flex justify-between">
 
-                  <span className="text-gray-400">
+                  <span className="text-xs uppercase tracking-wide text-slate-500">
                     AI{index}
                   </span>
 
-                  <span className="font-bold">
+                  <span className="text-base font-semibold font-mono text-cyan-400">
                     {value.toFixed(2)} V
                   </span>
 
                 </div>
 
-                <div className="w-full h-3 bg-[#111827] rounded-full mt-5 overflow-hidden">
+                <div className="w-full h-2 bg-[#111827] rounded-full mt-5 overflow-hidden">
 
                   <div
                     className={`h-full transition-all duration-300 ${
@@ -164,25 +166,25 @@ export default function OverviewTab({ daq }: Props) {
           Frequency Counter
         </h2>
 
-        <div className="bg-[#1c2333] rounded-xl p-8 flex items-center justify-between">
+        <div className="bg-[#1c2333] border border-slate-700 rounded-xl p-5 flex items-center justify-between">
 
           <div>
 
-            <div className="text-gray-400">
+            <div className="text-xs uppercase tracking-wide text-slate-500">
               Current Frequency
             </div>
 
-            <div className="text-5xl font-bold text-cyan-400 mt-2">
+            <div className="flex items-center gap-2 mt-2">
+  <div className="text-4xl font-bold font-mono leading-none">
+    {daq.freqValue !== null
+      ? daq.freqValue.toFixed(2)
+      : "--"}
+  </div>
 
-              {daq.freqValue !== null
-                ? daq.freqValue.toFixed(2)
-                : "--"}
-
-            </div>
-
-            <div className="text-gray-500 mt-2">
-              Hz
-            </div>
+  <div className="text-sm uppercase tracking-wide text-slate-500">
+    Hz
+  </div>
+</div>
 
           </div>
 

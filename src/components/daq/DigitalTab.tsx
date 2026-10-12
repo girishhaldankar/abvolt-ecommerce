@@ -18,48 +18,14 @@ export default function DigitalTab({ daq }: Props) {
 
           <button
             onClick={() => daq.quickSend?.("0")}
-            className="px-4 py-2 text-sm rounded-lg border border-slate-600 hover:border-cyan-400 hover:text-cyan-400 transition"
+             className="px-5 py-2 rounded-lg border border-slate-600 hover:border-cyan-400 hover:text-cyan-400 transition"
           >
             Read DI
           </button>
 
         </div>
 
-        {/* Auto Read */}
-
-        <div className="bg-[#20283a] border border-slate-700 rounded-2xl p-4 flex items-center justify-between mb-5">
-
-          <div className="flex items-center gap-4">
-
-            <button
-              className="px-4 py-2 text-sm rounded-lg bg-green-600 hover:bg-green-500 text-white font-semibold"
-            >
-              ▶ Start Auto Read
-            </button>
-
-            <div className="flex items-center gap-2 text-slate-400">
-
-              <span className="text-sm text-slate-400">
-    Every
-</span>
-
-              <div className="py-2 rounded-lg bg-[#293349] font-mono">
-                500
-              </div>
-
-              <span className="text-sm text-slate-400">
-    ms
-</span>
-
-            </div>
-
-          </div>
-
-          <span className="text-xs uppercase tracking-widest text-slate-500">
-            Idle
-          </span>
-
-        </div>
+      
 
         {/* Inputs */}
 
