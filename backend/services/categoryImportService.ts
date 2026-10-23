@@ -45,6 +45,9 @@ type ItemField =
 type ImportRow = Record<ImportColumn, string> & {
   rowNumber: number;
   errors: string[];
+  audienceAction?: "create" | "update";
+  streamAction?: "create" | "update";
+  hierarchyOnly?: boolean;
   categoryAction?: "create" | "update" | "already-imported";
   itemAction?: "create" | "update" | "already-imported";
   categoryGroupKey?: string;
@@ -65,6 +68,11 @@ type CategoryGroup = {
   categoryAction?: "create" | "update" | "already-imported";
   importKey?: string;
   importHash?: string;
+};
+
+type ResolvedParent = {
+  document: any;
+  action: "create" | "update";
 };
 
 export class CategoryImportError extends Error {
@@ -119,7 +127,11 @@ const FIELD_LIMITS: Record<ImportColumn, number> = {
   itemPath: 2048,
 };
 
-function validateRequest(columns: unknown, rows: unknown): ImportRow[] {
+function validateRequest(
+  columns: unknown,
+  rows: unknown,
+  allowNewAudienceAndStream = false
+): ImportRow[] {
   if (
     !Array.isArray(columns) ||
     columns.length !== CATEGORY_IMPORT_COLUMNS.length ||
@@ -172,7 +184,19 @@ function validateRequest(columns: unknown, rows: unknown): ImportRow[] {
       row[column] = raw.trim();
     }
 
-    for (const column of ["divisionId", "audienceId", "streamId"] as const) {
+    if (!OBJECT_ID_PATTERN.test(row.divisionId)) {
+      errors.push("divisionId must be a 24-character MongoDB ID");
+    } else {
+      row.divisionId = row.divisionId.toLowerCase();
+    }
+    for (const column of ["audienceId", "streamId"] as const) {
+      if (
+        !row[column] &&
+        allowNewAudienceAndStream &&
+        row[column === "audienceId" ? "audienceTitle" : "streamTitle"]
+      ) {
+        continue;
+      }
       if (!OBJECT_ID_PATTERN.test(row[column])) {
         errors.push(`${column} must be a 24-character MongoDB ID`);
       } else {
@@ -302,12 +326,131 @@ function makeCategoryGroupKey(row: ImportRow) {
   return `new:${row.divisionId}:${row.audienceId}:${row.streamId}:${row.title.toLocaleLowerCase()}`;
 }
 
-function buildGroups(rows: ImportRow[]) {
+function normalizedName(value: string) {
+  return value.trim().toLocaleLowerCase();
+}
+
+function matchingByTitle(records: any[], title: string) {
+  const normalizedTitle = normalizedName(title);
+  return records.filter(
+    (record) => normalizedName(record.title || "") === normalizedTitle
+  );
+}
+
+function resolveScopedParents(division: any, rows: ImportRow[]) {
+  const stagedAudiences = new Map<string, ResolvedParent>();
+  const stagedStreams = new Map<string, ResolvedParent>();
+
+  for (const row of rows) {
+    if (row.errors.length) continue;
+
+    let audience: any;
+    if (row.audienceId) {
+      audience = division.audiences.id(row.audienceId);
+      if (!audience) {
+        row.errors.push("audienceId does not belong to the selected Division");
+        continue;
+      }
+      if (audience.title !== row.audienceTitle) {
+        row.errors.push("audienceTitle does not match the specified Audience");
+        continue;
+      }
+      row.audienceAction = "update";
+    } else {
+      const key = normalizedName(row.audienceTitle);
+      const staged = stagedAudiences.get(key);
+      if (staged) {
+        audience = staged.document;
+        row.audienceAction = staged.action;
+      } else {
+        const matches = matchingByTitle(
+          Array.from(division.audiences || []),
+          row.audienceTitle
+        );
+        if (matches.length > 1) {
+          row.errors.push(
+            `audienceTitle "${row.audienceTitle}" is ambiguous; provide audienceId`
+          );
+          continue;
+        }
+        if (matches.length === 1) {
+          audience = matches[0];
+          row.audienceAction = "update";
+        } else {
+          audience = division.audiences.create({
+            title: row.audienceTitle,
+          });
+          division.audiences.push(audience);
+          row.audienceAction = "create";
+          stagedAudiences.set(key, { document: audience, action: "create" });
+        }
+      }
+      row.audienceId = getId(audience);
+    }
+
+    let stream: any;
+    if (row.streamId) {
+      stream = audience.streams.id(row.streamId);
+      if (!stream) {
+        row.errors.push("streamId does not belong to the specified Audience");
+        continue;
+      }
+      if (stream.title !== row.streamTitle) {
+        row.errors.push("streamTitle does not match the specified Stream");
+        continue;
+      }
+      row.streamAction = "update";
+    } else {
+      const streamKey = `${row.audienceId}:${normalizedName(row.streamTitle)}`;
+      const staged = stagedStreams.get(streamKey);
+      if (staged) {
+        stream = staged.document;
+        row.streamAction = staged.action;
+      } else {
+        const matches = matchingByTitle(
+          Array.from(audience.streams || []),
+          row.streamTitle
+        );
+        if (matches.length > 1) {
+          row.errors.push(
+            `streamTitle "${row.streamTitle}" is ambiguous under this Audience; provide streamId`
+          );
+          continue;
+        }
+        if (matches.length === 1) {
+          stream = matches[0];
+          row.streamAction = "update";
+        } else {
+          stream = audience.streams.create({ title: row.streamTitle });
+          audience.streams.push(stream);
+          row.streamAction = "create";
+          stagedStreams.set(streamKey, { document: stream, action: "create" });
+        }
+      }
+      row.streamId = getId(stream);
+    }
+  }
+}
+
+function buildGroups(rows: ImportRow[], allowHierarchyOnly = false) {
   const groups = new Map<string, CategoryGroup>();
   for (const row of rows) {
     if (row.errors.length) continue;
     if (!row.categoryId && !row.title) {
-      row.errors.push("title is required for a new category");
+      const hasCategoryValues = Boolean(row.description || row.icon || row.image);
+      if (
+        !allowHierarchyOnly
+      ) {
+        row.errors.push("title is required for a new category");
+      } else if (
+        row.itemId ||
+        hasMeaningfulItemData(row) ||
+        hasCategoryValues
+      ) {
+        row.errors.push("Category and item data require a categoryId or title");
+      } else {
+        row.hierarchyOnly = true;
+      }
       continue;
     }
 
@@ -371,6 +514,18 @@ function collectMarkers(division: any) {
 function publicRows(rows: ImportRow[]) {
   return rows.map((row) => ({
     rowNumber: row.rowNumber,
+    ...(row.audienceAction
+      ? {
+          audienceAction: row.errors.length ? "invalid" : row.audienceAction,
+          ...(row.audienceId ? { audienceId: row.audienceId } : {}),
+        }
+      : {}),
+    ...(row.streamAction
+      ? {
+          streamAction: row.errors.length ? "invalid" : row.streamAction,
+          ...(row.streamId ? { streamId: row.streamId } : {}),
+        }
+      : {}),
     categoryAction: row.errors.length ? "invalid" : row.categoryAction,
     itemAction: row.errors.length ? undefined : row.itemAction,
     ...(row.categoryId ? { categoryId: row.categoryId } : {}),
@@ -379,15 +534,37 @@ function publicRows(rows: ImportRow[]) {
   }));
 }
 
-async function validateRows(columns: unknown, sourceRows: unknown, importId?: string) {
+async function validateRows(
+  columns: unknown,
+  sourceRows: unknown,
+  importId?: string,
+  scopedDivisionId?: string
+) {
   if (importId !== undefined && !UUID_PATTERN.test(importId)) {
     throw new CategoryImportError(400, "importId must be a UUID");
   }
-  const rows = validateRequest(columns, sourceRows);
-  const groups = buildGroups(rows);
-  const divisionIds = new Set(
-    rows.filter((row) => OBJECT_ID_PATTERN.test(row.divisionId)).map((row) => row.divisionId)
-  );
+  if (
+    scopedDivisionId !== undefined &&
+    !OBJECT_ID_PATTERN.test(scopedDivisionId)
+  ) {
+    throw new CategoryImportError(400, "Invalid division ID");
+  }
+  const rows = validateRequest(columns, sourceRows, scopedDivisionId !== undefined);
+  const normalizedScopedDivisionId = scopedDivisionId?.toLowerCase();
+  if (normalizedScopedDivisionId) {
+    for (const row of rows) {
+      if (row.divisionId !== normalizedScopedDivisionId) {
+        row.errors.push("divisionId must match the selected Division");
+      }
+    }
+  }
+  const divisionIds = normalizedScopedDivisionId
+    ? new Set([normalizedScopedDivisionId])
+    : new Set(
+        rows
+          .filter((row) => OBJECT_ID_PATTERN.test(row.divisionId))
+          .map((row) => row.divisionId)
+      );
   const divisions = await Division.find({
     _id: { $in: [...divisionIds] },
   }).select(
@@ -395,6 +572,23 @@ async function validateRows(columns: unknown, sourceRows: unknown, importId?: st
   );
   const divisionsById = new Map(divisions.map((division) => [getId(division), division]));
   const markersByDivision = new Map<string, ReturnType<typeof collectMarkers>>();
+  if (normalizedScopedDivisionId) {
+    const division = divisionsById.get(normalizedScopedDivisionId);
+    if (!division) {
+      for (const row of rows) {
+        row.errors.push("Division was not found");
+      }
+    } else {
+      for (const row of rows) {
+        if (row.errors.length) continue;
+        if (row.divisionTitle !== division.title) {
+          row.errors.push("divisionTitle does not match the selected Division");
+        }
+      }
+      resolveScopedParents(division, rows);
+    }
+  }
+  const groups = buildGroups(rows, normalizedScopedDivisionId !== undefined);
 
   const categoryIdsSeen = new Map<string, ImportRow>();
   const itemIdsSeen = new Map<
@@ -587,8 +781,29 @@ async function validateRows(columns: unknown, sourceRows: unknown, importId?: st
   const validGroups = groups.filter((group) =>
     group.rows.every((row) => row.errors.length === 0)
   );
+  const uniqueParentActionCount = (
+    type: "audience" | "stream",
+    action: "create" | "update"
+  ) => {
+    const ids = rows.flatMap((row) => {
+      const rowAction =
+        type === "audience" ? row.audienceAction : row.streamAction;
+      const id = type === "audience" ? row.audienceId : row.streamId;
+      return row.errors.length === 0 && rowAction === action && id ? [id] : [];
+    });
+    return new Set(ids).size;
+  };
+  const parentSummary = normalizedScopedDivisionId
+    ? {
+        audiencesCreated: uniqueParentActionCount("audience", "create"),
+        audiencesUpdated: uniqueParentActionCount("audience", "update"),
+        streamsCreated: uniqueParentActionCount("stream", "create"),
+        streamsUpdated: uniqueParentActionCount("stream", "update"),
+      }
+    : {};
   const summary = {
     total: rows.length,
+    ...parentSummary,
     categoriesCreated: validGroups.filter((group) => group.categoryAction === "create").length,
     categoriesUpdated: validGroups.filter((group) => group.categoryAction === "update").length,
     categoriesAlreadyImported: validGroups.filter((group) => group.categoryAction === "already-imported").length,
@@ -616,15 +831,34 @@ export async function previewCategoryImport(columns: unknown, rows: unknown) {
   };
 }
 
+export async function previewDivisionCategoryImport(
+  divisionId: string,
+  columns: unknown,
+  rows: unknown
+) {
+  const validation = await validateRows(columns, rows, undefined, divisionId);
+  return {
+    valid: validation.valid,
+    summary: validation.summary,
+    rows: publicRows(validation.rows),
+  };
+}
+
 export async function commitCategoryImport(
   columns: unknown,
   rows: unknown,
-  importId: unknown
+  importId: unknown,
+  scopedDivisionId?: string
 ) {
   if (typeof importId !== "string") {
     throw new CategoryImportError(400, "importId is required");
   }
-  const validation = await validateRows(columns, rows, importId);
+  const validation = await validateRows(
+    columns,
+    rows,
+    importId,
+    scopedDivisionId
+  );
   if (!validation.valid) {
     return {
       committed: false,
@@ -635,8 +869,17 @@ export async function commitCategoryImport(
   }
 
   const divisionIds = new Set(validation.rows.map((row) => row.divisionId));
-  if (divisionIds.size !== 1) {
-    throw new CategoryImportError(409, "A commit may target only one Division. Split the import by Division.");
+  if (
+    divisionIds.size !== 1 ||
+    (scopedDivisionId !== undefined &&
+      !divisionIds.has(scopedDivisionId.toLowerCase()))
+  ) {
+    throw new CategoryImportError(
+      409,
+      scopedDivisionId
+        ? "A commit may target only the selected Division."
+        : "A commit may target only one Division. Split the import by Division."
+    );
   }
   const division = validation.divisionsById.get(validation.rows[0].divisionId);
   if (!division) throw new CategoryImportError(409, "Division changed before commit; preview again");
@@ -749,4 +992,13 @@ export async function commitCategoryImport(
     summary: validation.summary,
     rows: responseRows,
   };
+}
+
+export function commitDivisionCategoryImport(
+  divisionId: string,
+  columns: unknown,
+  rows: unknown,
+  importId: unknown
+) {
+  return commitCategoryImport(columns, rows, importId, divisionId);
 }

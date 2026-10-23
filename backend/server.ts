@@ -29,6 +29,10 @@ app.use(
   "/api/divisions/category-import",
   express.json({ limit: "1mb" })
 );
+app.use(
+  "/api/divisions/:divisionId/category-import",
+  express.json({ limit: "1mb" })
+);
 app.use(express.json());
 
 /* ------------------- HEALTH CHECK ------------------- */

@@ -31,6 +31,10 @@ export type CategoryImportRow = Record<
 
 export interface CategoryImportSummary {
   total: number;
+  audiencesCreated?: number;
+  audiencesUpdated?: number;
+  streamsCreated?: number;
+  streamsUpdated?: number;
   categoriesCreated: number;
   categoriesUpdated: number;
   categoriesAlreadyImported: number;
@@ -42,8 +46,12 @@ export interface CategoryImportSummary {
 
 export interface CategoryImportRowResult {
   rowNumber: number;
+  audienceAction?: "create" | "update" | "invalid";
+  streamAction?: "create" | "update" | "invalid";
   categoryAction?: "create" | "update" | "already-imported" | "invalid";
   itemAction?: "create" | "update" | "already-imported";
+  audienceId?: string;
+  streamId?: string;
   categoryId?: string;
   itemId?: string;
   errors: string[];
@@ -90,6 +98,36 @@ export async function commitCategoryImport(
       method: "POST",
       body: JSON.stringify({ ...payload, importId }),
     })) as CategoryImportCommitResult;
+  } catch (error) {
+    if (error instanceof ApiError && isCommitResult(error.data)) {
+      return error.data;
+    }
+    throw error;
+  }
+}
+
+export const previewDivisionCategoryImport = (
+  divisionId: string,
+  payload: CategoryImportPayload
+) =>
+  apiFetch(`/divisions/${encodeURIComponent(divisionId)}/category-import/preview`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  }) as Promise<CategoryImportPreview>;
+
+export async function commitDivisionCategoryImport(
+  divisionId: string,
+  payload: CategoryImportPayload,
+  importId: string
+): Promise<CategoryImportCommitResult> {
+  try {
+    return (await apiFetch(
+      `/divisions/${encodeURIComponent(divisionId)}/category-import/commit`,
+      {
+        method: "POST",
+        body: JSON.stringify({ ...payload, importId }),
+      }
+    )) as CategoryImportCommitResult;
   } catch (error) {
     if (error instanceof ApiError && isCommitResult(error.data)) {
       return error.data;

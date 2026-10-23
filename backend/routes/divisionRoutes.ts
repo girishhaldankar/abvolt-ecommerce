@@ -27,6 +27,8 @@ import { requireAdmin } from "../middleware/requireAdmin";
 import {
   CategoryImportError,
   commitCategoryImport,
+  commitDivisionCategoryImport,
+  previewDivisionCategoryImport,
   previewCategoryImport,
 } from "../services/categoryImportService";
 
@@ -74,6 +76,51 @@ router.post(
       }
       console.error("Category import commit failed");
       return res.status(500).json({ error: "Unable to commit category import" });
+    }
+  }
+);
+
+router.post(
+  "/:divisionId/category-import/preview",
+  requireAdmin,
+  async (req, res) => {
+    try {
+      await connectDB();
+      const result = await previewDivisionCategoryImport(
+        req.params.divisionId,
+        req.body?.columns,
+        req.body?.rows
+      );
+      res.json(result);
+    } catch (error) {
+      if (error instanceof CategoryImportError) {
+        return res.status(error.statusCode).json({ error: error.message });
+      }
+      console.error("Division category import preview failed");
+      return res.status(500).json({ error: "Unable to validate division category import" });
+    }
+  }
+);
+
+router.post(
+  "/:divisionId/category-import/commit",
+  requireAdmin,
+  async (req, res) => {
+    try {
+      await connectDB();
+      const result = await commitDivisionCategoryImport(
+        req.params.divisionId,
+        req.body?.columns,
+        req.body?.rows,
+        req.body?.importId
+      );
+      res.status(result.committed ? 200 : 422).json(result);
+    } catch (error) {
+      if (error instanceof CategoryImportError) {
+        return res.status(error.statusCode).json({ error: error.message });
+      }
+      console.error("Division category import commit failed");
+      return res.status(500).json({ error: "Unable to commit division category import" });
     }
   }
 );
