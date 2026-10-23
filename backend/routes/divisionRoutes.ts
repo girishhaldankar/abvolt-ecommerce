@@ -23,8 +23,60 @@ import {
 } from "../services/divisionService";
 
 import { connectDB } from "../server"; // Import the DB connection function
+import { requireAdmin } from "../middleware/requireAdmin";
+import {
+  CategoryImportError,
+  commitCategoryImport,
+  previewCategoryImport,
+} from "../services/categoryImportService";
 
 const router = Router();
+
+/* =========================================================
+   BULK CATEGORY IMPORT
+========================================================= */
+router.post(
+  "/category-import/preview",
+  requireAdmin,
+  async (req, res) => {
+    try {
+      await connectDB();
+      const result = await previewCategoryImport(
+        req.body?.columns,
+        req.body?.rows
+      );
+      res.json(result);
+    } catch (error) {
+      if (error instanceof CategoryImportError) {
+        return res.status(error.statusCode).json({ error: error.message });
+      }
+      console.error("Category import preview failed");
+      return res.status(500).json({ error: "Unable to validate category import" });
+    }
+  }
+);
+
+router.post(
+  "/category-import/commit",
+  requireAdmin,
+  async (req, res) => {
+    try {
+      await connectDB();
+      const result = await commitCategoryImport(
+        req.body?.columns,
+        req.body?.rows,
+        req.body?.importId
+      );
+      res.status(result.committed ? 200 : 422).json(result);
+    } catch (error) {
+      if (error instanceof CategoryImportError) {
+        return res.status(error.statusCode).json({ error: error.message });
+      }
+      console.error("Category import commit failed");
+      return res.status(500).json({ error: "Unable to commit category import" });
+    }
+  }
+);
 
 /* =========================================================
    DIVISION ROUTES
@@ -48,7 +100,7 @@ router.get("/:divisionId", async (req, res) => {
   res.json(division);
 });
 
-router.post("/", async (req, res) => {
+router.post("/", requireAdmin, async (req, res) => {
   await connectDB();
   try {
     const division = await createDivision(req.body);
@@ -58,7 +110,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.put("/:divisionId", async (req, res) => {
+router.put("/:divisionId", requireAdmin, async (req, res) => {
   await connectDB();
   try {
     const division = await updateDivision(req.params.divisionId, req.body);
@@ -68,7 +120,7 @@ router.put("/:divisionId", async (req, res) => {
   }
 });
 
-router.delete("/:divisionId", async (req, res) => {
+router.delete("/:divisionId", requireAdmin, async (req, res) => {
   await connectDB();
   try {
     const result = await deleteDivision(req.params.divisionId);
@@ -81,7 +133,7 @@ router.delete("/:divisionId", async (req, res) => {
 /* =========================================================
    AUDIENCE ROUTES
 ========================================================= */
-router.post("/:divisionId/audiences", async (req, res) => {
+router.post("/:divisionId/audiences", requireAdmin, async (req, res) => {
   await connectDB();
   try {
     const audience = await addAudience(req.params.divisionId, req.body);
@@ -91,7 +143,7 @@ router.post("/:divisionId/audiences", async (req, res) => {
   }
 });
 
-router.put("/:divisionId/audiences/:audienceId", async (req, res) => {
+router.put("/:divisionId/audiences/:audienceId", requireAdmin, async (req, res) => {
   await connectDB();
   try {
     const audience = await updateAudience(
@@ -105,7 +157,7 @@ router.put("/:divisionId/audiences/:audienceId", async (req, res) => {
   }
 });
 
-router.delete("/:divisionId/audiences/:audienceId", async (req, res) => {
+router.delete("/:divisionId/audiences/:audienceId", requireAdmin, async (req, res) => {
   await connectDB();
   try {
     const result = await deleteAudience(
@@ -121,7 +173,7 @@ router.delete("/:divisionId/audiences/:audienceId", async (req, res) => {
 /* =========================================================
    STREAM ROUTES
 ========================================================= */
-router.post("/:divisionId/audiences/:audienceId/streams", async (req, res) => {
+router.post("/:divisionId/audiences/:audienceId/streams", requireAdmin, async (req, res) => {
   await connectDB();
   try {
     const stream = await addStream(
@@ -137,6 +189,7 @@ router.post("/:divisionId/audiences/:audienceId/streams", async (req, res) => {
 
 router.put(
   "/:divisionId/audiences/:audienceId/streams/:streamId",
+  requireAdmin,
   async (req, res) => {
     await connectDB();
     try {
@@ -155,6 +208,7 @@ router.put(
 
 router.delete(
   "/:divisionId/audiences/:audienceId/streams/:streamId",
+  requireAdmin,
   async (req, res) => {
     await connectDB();
     try {
@@ -175,6 +229,7 @@ router.delete(
 ========================================================= */
 router.post(
   "/:divisionId/audiences/:audienceId/streams/:streamId/categories",
+  requireAdmin,
   async (req, res) => {
     await connectDB();
     try {
@@ -193,6 +248,7 @@ router.post(
 
 router.put(
   "/:divisionId/audiences/:audienceId/streams/:streamId/categories/:categoryId",
+  requireAdmin,
   async (req, res) => {
     await connectDB();
     try {
@@ -212,6 +268,7 @@ router.put(
 
 router.delete(
   "/:divisionId/audiences/:audienceId/streams/:streamId/categories/:categoryId",
+  requireAdmin,
   async (req, res) => {
     await connectDB();
     try {
@@ -233,6 +290,7 @@ router.delete(
 ========================================================= */
 router.post(
   "/:divisionId/audiences/:audienceId/streams/:streamId/categories/:categoryId/items",
+  requireAdmin,
   async (req, res) => {
     await connectDB();
     try {
@@ -252,6 +310,7 @@ router.post(
 
 router.put(
   "/:divisionId/audiences/:audienceId/streams/:streamId/categories/:categoryId/items/:itemId",
+  requireAdmin,
   async (req, res) => {
     await connectDB();
     try {
@@ -272,6 +331,7 @@ router.put(
 
 router.delete(
   "/:divisionId/audiences/:audienceId/streams/:streamId/categories/:categoryId/items/:itemId",
+  requireAdmin,
   async (req, res) => {
     await connectDB();
     try {

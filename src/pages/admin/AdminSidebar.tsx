@@ -8,6 +8,7 @@ import { deleteAudience } from "../../services/audiences.service";
 import { deleteStream } from "../../services/streams.service";
 import { deleteCategory } from "../../services/categories.service";
 import { deleteItem } from "../../services/items.service";
+import { useAuth } from "../../context/AuthContext";
 
 
 /* ---------------------------------------------
@@ -25,6 +26,8 @@ export default function AdminSidebar() {
   const [expandedDivisions, setExpandedDivisions] = useState<Set<string>>(new Set());
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   const navigate = useNavigate();
+  const { user, signOut } = useAuth();
+  const [signOutError, setSignOutError] = useState("");
 
   useEffect(() => {
     getAllDivisions().then((data) => setDivisions(data || []));
@@ -51,6 +54,31 @@ export default function AdminSidebar() {
           Admin Panel
         </h2>
         <p className="text-xs text-gray-400 mt-1">Manage your content</p>
+        <div className="mt-4 flex items-center justify-between gap-3">
+          <span className="truncate text-xs text-gray-300" title={user?.email || undefined}>
+            {user?.email}
+          </span>
+          <button
+            type="button"
+            onClick={async () => {
+              setSignOutError("");
+              try {
+                await signOut();
+                navigate("/admin/login", { replace: true });
+              } catch {
+                setSignOutError("Unable to sign out. Please try again.");
+              }
+            }}
+            className="shrink-0 rounded border border-gray-600 px-2 py-1 text-xs text-gray-200 hover:bg-gray-700"
+          >
+            Sign out
+          </button>
+        </div>
+        {signOutError && (
+          <p className="mt-2 text-xs text-red-300" role="alert">
+            {signOutError}
+          </p>
+        )}
       </div>
 
       {/* ADD DIVISION */}

@@ -12,4 +12,7 @@ export const categorySchema = new Schema({
 
   // Keep all existing product data
   items: [itemSchema],
+
+  _bulkImportKey: { type: String, select: false },
+  _bulkImportHash: { type: String, select: false },
 });

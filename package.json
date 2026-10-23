@@ -37,6 +37,7 @@
             "clsx": "*",
             "cmdk": "^1.1.1",
             "embla-carousel-react": "^8.6.0",
+            "firebase": "^12.0.0",
             "framer-motion": "^12.34.0",
             "input-otp": "^1.4.2",
             "lottie-react": "^2.4.1",
@@ -55,7 +56,8 @@
             "tailwind-merge": "*",
             "three": "^0.172.0",
             "vaul": "^1.1.2",
-            "vite-plugin-svgr": "^4.5.0"
+            "vite-plugin-svgr": "^4.5.0",
+            "xlsx": "^0.18.5"
       },
       "devDependencies": {
             "@types/node": "^20.10.0",

@@ -18,6 +18,8 @@ import QubiIDE from "./pages/QubiIDE";
 
 /* ---------------- ADMIN ---------------- */
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminLogin from "./pages/admin/AdminLogin";
+import RequireAdmin from "./components/admin/RequireAdmin";
 import DivisionForm from "./pages/admin/DivisionForm";
 import AudienceForm from "./pages/admin/AudienceForm";
 import StreamForm from "./pages/admin/StreamForm";
@@ -38,6 +40,9 @@ export default function App() {
 
       <Routes>
         {/* ================= ADMIN ================= */}
+  <Route path="/admin/login" element={<AdminLogin />} />
+
+  <Route element={<RequireAdmin />}>
   <Route path="/admin" element={<AdminDashboard />} />
 
   <Route path="/admin/division/new" element={<DivisionForm />} />
@@ -88,6 +93,7 @@ export default function App() {
   path="/admin/division/:divisionId/audience/:audienceId/stream/:streamId/category/:categoryId/item/:itemId/edit"
   element={<ItemForm />}
 />
+  </Route>
 
 
         {/* ================= PUBLIC ROUTES ================= */}

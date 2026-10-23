@@ -10,4 +10,6 @@ export const itemSchema = new Schema({
   icon: String,                   // Emoji or icon
   price: Number,                  // Optional
   path: String,                   // Optional path
+  _bulkImportKey: { type: String, select: false },
+  _bulkImportHash: { type: String, select: false },
 });

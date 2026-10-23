@@ -4,6 +4,7 @@ import express, { Request, Response, NextFunction } from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
+import path from "path";
 import "express-async-errors";
 
 import divisionRoutes from "./routes/divisionRoutes";
@@ -11,12 +12,23 @@ import divisionRoutes from "./routes/divisionRoutes";
 // Use Google DNS for MongoDB SRV resolution
 dns.setServers(["8.8.8.8", "8.8.4.4"]);
 
-dotenv.config();
+dotenv.config({
+  path: [
+    path.resolve(__dirname, ".env"),
+    path.resolve(__dirname, "..", ".env"),
+    path.resolve(process.cwd(), "backend", ".env"),
+    path.resolve(process.cwd(), ".env"),
+  ],
+});
 
 const app = express();
 
 /* ------------------- MIDDLEWARE ------------------- */
 app.use(cors());
+app.use(
+  "/api/divisions/category-import",
+  express.json({ limit: "1mb" })
+);
 app.use(express.json());
 
 /* ------------------- HEALTH CHECK ------------------- */
@@ -29,6 +41,13 @@ app.use("/api/divisions", divisionRoutes);
 
 /* ------------------- GLOBAL ERROR HANDLER ------------------- */
 app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+  if (err?.type === "entity.too.large") {
+    return res.status(413).json({ error: "Import request exceeds the 1 MB limit" });
+  }
+  if (err?.type === "entity.parse.failed") {
+    return res.status(400).json({ error: "Invalid JSON request body" });
+  }
+
   console.error("Global Error Handler:", err);
   res.status(err.status || 500).json({ error: err.message || "Server Error" });
 });
@@ -54,8 +73,11 @@ export async function connectDB() {
   if (!cached.promise) {
     console.log("Connecting to MongoDB...");
 
+    const mongoUri = MONGO_URI;
+    if (!mongoUri) throw new Error("MONGO_URI not found in environment variables");
+
     cached.promise = mongoose
-      .connect(MONGO_URI)
+      .connect(mongoUri)
       .then((mongoose) => {
         console.log("✅ MongoDB connected");
         return mongoose;
