@@ -1,6 +1,6 @@
 // src/components/admin/AudienceForm.tsx
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import * as Icons from "lucide-react";
 import { getDivisionById } from "../../services/divisions.service";
 import { addAudience, updateAudience } from "../../services/audiences.service";
@@ -25,6 +25,10 @@ export default function AudienceForm({
   onSave,
 }: Props) {
   const { divisionId: paramDivisionId, audienceId: paramAudienceId } = useParams();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const returnToDivisionManager =
+    location.state?.returnToDivisionManager === true;
 
   const divisionId = propDivisionId || paramDivisionId;
   const audienceId = propAudienceId || paramAudienceId;
@@ -89,8 +93,11 @@ export default function AudienceForm({
       }
 
       if (!onSave) {
-        // Reload page if no callback
-        window.location.href = `/admin/division/${divisionId}?t=${Date.now()}`;
+        if (returnToDivisionManager) {
+          navigate(`/admin/division/${divisionId}/manage`);
+        } else {
+          window.location.href = `/admin/division/${divisionId}?t=${Date.now()}`;
+        }
       }
     } catch (err: any) {
       setError(err.message || "Failed to save audience");
@@ -200,13 +207,27 @@ export default function AudienceForm({
         </div>
 
         {/* SAVE BUTTON */}
-        <button
-          type="submit"
-          className="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400 font-medium"
-          disabled={isSaving}
-        >
-          {isSaving ? "Saving..." : "Save Audience"}
-        </button>
+        <div className="flex gap-3">
+          <button
+            type="submit"
+            className="flex-1 rounded bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700 disabled:bg-gray-400"
+            disabled={isSaving}
+          >
+            {isSaving ? "Saving..." : "Save Audience"}
+          </button>
+          {returnToDivisionManager && (
+            <button
+              type="button"
+              className="rounded bg-gray-300 px-4 py-2 font-medium hover:bg-gray-400 disabled:opacity-50"
+              disabled={isSaving}
+              onClick={() =>
+                navigate(`/admin/division/${divisionId}/manage`)
+              }
+            >
+              Cancel
+            </button>
+          )}
+        </div>
       </form>
     </div>
   );

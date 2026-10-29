@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, useNavigate, Link, useLocation } from "react-router-dom";
 import { getDivisionById } from "../../services/divisions.service";
 import AdminSidebar from "./AdminSidebar";
 import placeholderImage from "../../assets/microchip.jpg";
@@ -28,6 +28,7 @@ export default function ItemDetailPage() {
   }>();
 
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [item, setItem] = useState<Item | null>(null);
   const [loading, setLoading] = useState(true);
@@ -135,6 +136,7 @@ export default function ItemDetailPage() {
 
           <Link
             to={`/admin/division/${divisionId}/audience/${audienceId}/stream/${streamId}/category/${categoryId}/item/${item._id}`}
+            state={location.state}
             className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
           >
             ✏️ Edit Item

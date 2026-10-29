@@ -8,6 +8,7 @@ import path from "path";
 import "express-async-errors";
 
 import divisionRoutes from "./routes/divisionRoutes";
+import quoteRoutes from "./routes/quoteRoutes";
 
 // Use Google DNS for MongoDB SRV resolution
 dns.setServers(["8.8.8.8", "8.8.4.4"]);
@@ -42,6 +43,7 @@ app.get("/", (_req: Request, res: Response) => {
 
 /* ------------------- ROUTES ------------------- */
 app.use("/api/divisions", divisionRoutes);
+app.use("/api/quotes", quoteRoutes);
 
 /* ------------------- GLOBAL ERROR HANDLER ------------------- */
 app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {

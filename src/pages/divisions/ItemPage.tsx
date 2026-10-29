@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { Header } from "../../components/Header";
 import { Footer } from "../../components/Footer";
+import QuoteRequestModal from "../../components/QuoteRequestModal";
 import GlowBackground from "../../components/ui/GlowBackground";
 import { getDivisionById } from "../../services/divisions.service";
 import defaultImage from "../../assets/microchip.jpg";
@@ -12,6 +13,7 @@ export default function ItemPage() {
 
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [quoteOpen, setQuoteOpen] = useState(false);
 
   useEffect(() => {
     if (!divisionId || !audienceId || !streamId || !categoryId || !itemId)
@@ -203,12 +205,33 @@ export default function ItemPage() {
 
           {/* CTA */}
           <div className="text-center">
-            <button className="inline-flex items-center justify-center px-8 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold transition shadow-lg shadow-blue-600/30">
+            <button
+              type="button"
+              onClick={() => setQuoteOpen(true)}
+              className="inline-flex items-center justify-center px-8 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold transition shadow-lg shadow-blue-600/30"
+            >
               Request Quote
             </button>
           </div>
         </div>
       </section>
+
+      {quoteOpen && (
+        <QuoteRequestModal
+          item={{
+            itemSource: "division",
+            itemId: String(item?._id || item?.id || itemId),
+            itemName: item?.name || item?.title || "Catalogue item",
+            itemCode: item?.code,
+            itemCategory: category?.title,
+            divisionId,
+            audienceId,
+            streamId,
+            categoryId,
+          }}
+          onClose={() => setQuoteOpen(false)}
+        />
+      )}
 
       <Footer />
     </>

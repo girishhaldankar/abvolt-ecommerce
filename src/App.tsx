@@ -26,7 +26,9 @@ import StreamForm from "./pages/admin/StreamForm";
 import CategoryForm from "./pages/admin/CategoryForm";
 import ItemForm from "./pages/admin/ItemForm";
 import ItemDetailPage from "./pages/admin/ItemDetailPage";
+import DivisionManager from "./pages/admin/DivisionManager";
 import EditDivision from "./pages/admin/EditDivision";
+import QuoteEnquiriesPage from "./pages/admin/QuoteEnquiriesPage";
 import AbvoltDAQPage from "./pages/AbvoltDAQPage";
 
 
@@ -44,7 +46,12 @@ export default function App() {
 
   <Route element={<RequireAdmin />}>
   <Route path="/admin" element={<AdminDashboard />} />
+  <Route path="/admin/quotes" element={<QuoteEnquiriesPage />} />
 
+  <Route
+    path="/admin/division/:divisionId/manage"
+    element={<DivisionManager />}
+  />
   <Route path="/admin/division/new" element={<DivisionForm />} />
   <Route path="/admin/division/:divisionId" element={<DivisionForm />} />
 

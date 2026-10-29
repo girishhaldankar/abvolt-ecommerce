@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import * as Icons from "lucide-react";
 
 import { getDivisionById } from "../../services/divisions.service";
@@ -48,6 +48,9 @@ async function uploadToCloudinary(file: File): Promise<string> {
 export default function CategoryForm() {
   const { divisionId, audienceId, streamId, categoryId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const returnToDivisionManager =
+    location.state?.returnToDivisionManager === true;
 
   /* ---------------- STATE ---------------- */
   const [title, setTitle] = useState("");
@@ -234,7 +237,9 @@ export default function CategoryForm() {
       }
 
       navigate(
-        `/admin/division/${divisionId}/audience/${audienceId}/stream/${streamId}?t=${Date.now()}`
+        returnToDivisionManager
+          ? `/admin/division/${divisionId}/manage`
+          : `/admin/division/${divisionId}/audience/${audienceId}/stream/${streamId}?t=${Date.now()}`
       );
     } catch (err: any) {
       setError(err?.message || "Failed to save category");
@@ -405,19 +410,33 @@ export default function CategoryForm() {
         </div>
 
         {/* SAVE */}
-        <button
-          type="submit"
-          className="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400 font-medium"
-          disabled={isSaving}
-        >
-          {isSaving
-            ? image
-              ? "Uploading Image & Saving..."
-              : "Saving..."
-            : isEditing
-              ? "Update Category"
-              : "Save Category"}
-        </button>
+        <div className="flex gap-3">
+          <button
+            type="submit"
+            className="flex-1 rounded bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700 disabled:bg-gray-400"
+            disabled={isSaving}
+          >
+            {isSaving
+              ? image
+                ? "Uploading Image & Saving..."
+                : "Saving..."
+              : isEditing
+                ? "Update Category"
+                : "Save Category"}
+          </button>
+          {returnToDivisionManager && (
+            <button
+              type="button"
+              className="rounded bg-gray-300 px-4 py-2 font-medium hover:bg-gray-400 disabled:opacity-50"
+              disabled={isSaving}
+              onClick={() =>
+                navigate(`/admin/division/${divisionId}/manage`)
+              }
+            >
+              Cancel
+            </button>
+          )}
+        </div>
       </form>
     </div>
   );

@@ -1,17 +1,19 @@
 
 import { useEffect, useState } from "react";
-import type { FormEvent } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { X, Send, MessageSquareQuote } from "lucide-react";
+import { MessageSquareQuote } from "lucide-react";
 
 import { Header } from "../../components/Header";
 import { Footer } from "../../components/Footer";
+import QuoteRequestModal from "../../components/QuoteRequestModal";
+import type { QuoteItemReference } from "../../components/QuoteRequestModal";
 import GlowBackground from "../../components/ui/GlowBackground";
 import { getDivisionById } from "../../services/divisions.service";
 import heroImage from "../../assets/microchip.jpg";
 
 type QuoteItem = {
-  _id: string;
+  _id?: string;
+  id?: string;
   title?: string;
   name?: string;
   code?: string;
@@ -25,11 +27,6 @@ export default function CategoryPage() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [selectedItem, setSelectedItem] = useState<QuoteItem | null>(null);
-
-  const [customerName, setCustomerName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [quantity, setQuantity] = useState("1");
-  const [requirements, setRequirements] = useState("");
 
   /* =====================
      LOAD CATEGORY DATA
@@ -85,27 +82,6 @@ export default function CategoryPage() {
   ===================== */
   function openQuoteModal(item: QuoteItem) {
     setSelectedItem(item);
-    setCustomerName("");
-    setPhone("");
-    setQuantity("1");
-    setRequirements(item.code ? `Product Code: ${item.code}` : "");
-  }
-
-  function handleQuoteSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
-    console.info("Quote request draft", {
-      itemId: selectedItem?._id,
-      itemName: selectedItem?.title || selectedItem?.name,
-      customerName,
-      phone,
-      quantity,
-      requirements,
-    });
-
-    alert(
-      "The quote form is ready, but submission is not connected yet. Connect the quote API before accepting requests."
-    );
   }
 
   /* =====================
@@ -353,146 +329,22 @@ export default function CategoryPage() {
       {/* ==================================================
           5. REQUEST A QUOTE MODAL
       ================================================== */}
-      {selectedItem && (
-        <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-sm"
-          onMouseDown={(event) => {
-            if (event.target === event.currentTarget) {
-              setSelectedItem(null);
-            }
-          }}
-        >
-          <section
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="quote-modal-title"
-            className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-slate-200 bg-white text-slate-900 shadow-2xl dark:border-slate-700 dark:bg-slate-900 dark:text-white"
-          >
-            <div className="flex items-start justify-between gap-4 border-b border-slate-200 p-5 dark:border-slate-700">
-              <div className="min-w-0">
-                <p className="text-sm font-semibold text-blue-700 dark:text-cyan-400">
-                  ABVOLT E-commerce
-                </p>
-
-                <h2
-                  id="quote-modal-title"
-                  className="mt-1 text-xl font-bold"
-                >
-                  Request a Quote
-                </h2>
-
-                <p className="mt-2 text-sm font-medium text-slate-700 dark:text-slate-300">
-                  Product Code: {selectedItem.code || "N/A"}
-                </p>
-
-                <p className="mt-1 break-words text-sm text-slate-500 dark:text-slate-400">
-                  {selectedItem.title || selectedItem.name}
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setSelectedItem(null)}
-                aria-label="Close quote form"
-                className="rounded-lg p-2 text-slate-600 transition hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-slate-300 dark:hover:bg-slate-800"
-              >
-                <X size={20} />
-              </button>
-            </div>
-
-            <form onSubmit={handleQuoteSubmit} className="space-y-4 p-5">
-              <div className="space-y-1.5">
-                <label
-                  htmlFor="quote-name"
-                  className="text-sm font-medium text-slate-800 dark:text-slate-200"
-                >
-                  Your name
-                </label>
-
-                <input
-                  id="quote-name"
-                  value={customerName}
-                  onChange={(event) => setCustomerName(event.target.value)}
-                  required
-                  autoComplete="name"
-                  placeholder="Enter your name"
-                  className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-900 outline-none placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-400"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label
-                  htmlFor="quote-phone"
-                  className="text-sm font-medium text-slate-800 dark:text-slate-200"
-                >
-                  Phone number
-                </label>
-
-                <input
-                  id="quote-phone"
-                  type="tel"
-                  value={phone}
-                  onChange={(event) => setPhone(event.target.value)}
-                  required
-                  autoComplete="tel"
-                  placeholder="Enter your contact number"
-                  className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-900 outline-none placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-400"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label
-                  htmlFor="quote-quantity"
-                  className="text-sm font-medium text-slate-800 dark:text-slate-200"
-                >
-                  Quantity required
-                </label>
-
-                <input
-                  id="quote-quantity"
-                  type="number"
-                  min="1"
-                  step="1"
-                  value={quantity}
-                  onChange={(event) => setQuantity(event.target.value)}
-                  required
-                  className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label
-                  htmlFor="quote-requirements"
-                  className="text-sm font-medium text-slate-800 dark:text-slate-200"
-                >
-                  Additional requirements (optional)
-                </label>
-
-                <textarea
-                  id="quote-requirements"
-                  value={requirements}
-                  onChange={(event) => setRequirements(event.target.value)}
-                  rows={3}
-                  placeholder="Tell us about your requirements"
-                  className="w-full resize-y rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-900 outline-none placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-400"
-                />
-              </div>
-
-              <button
-                type="submit"
-                className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-3 font-semibold text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900"
-              >
-                <Send size={16} />
-                Continue
-              </button>
-
-              <p className="text-xs leading-relaxed text-slate-500 dark:text-slate-400">
-                Your quote request is not sent or saved yet. Submission must
-                be connected to the backend before this form is used live.
-              </p>
-            </form>
-          </section>
-        </div>
+      {selectedItem && (selectedItem._id || selectedItem.id) && (
+        <QuoteRequestModal
+          item={
+            {
+              itemSource: "division",
+              itemId: selectedItem._id || selectedItem.id || "",
+              itemName: selectedItem.title || selectedItem.name || "Catalogue item",
+              itemCode: selectedItem.code,
+              divisionId,
+              audienceId,
+              streamId,
+              categoryId,
+            } satisfies QuoteItemReference
+          }
+          onClose={() => setSelectedItem(null)}
+        />
       )}
 
       {/* ==================================================

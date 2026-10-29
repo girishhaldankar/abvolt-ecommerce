@@ -1,5 +1,5 @@
 import { useState, useEffect, FormEvent } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { getDivisionById } from "../../services/divisions.service";
 import { addItem, updateItem } from "../../services/items.service";
 import placeholderImage from "../../assets/microchip.jpg";
@@ -13,6 +13,9 @@ const CLOUDINARY_CLOUD_NAME = "dnlh51hmc";
 export default function ItemForm() {
   const { divisionId, audienceId, streamId, categoryId, itemId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const returnToDivisionManager =
+    location.state?.returnToDivisionManager === true;
 
   const [title, setTitle] = useState("");
   const [code, setCode] = useState("");
@@ -156,7 +159,9 @@ export default function ItemForm() {
       }
 
       navigate(
-        `/admin/division/${divisionId}/audience/${audienceId}/stream/${streamId}`
+        returnToDivisionManager
+          ? `/admin/division/${divisionId}/manage`
+          : `/admin/division/${divisionId}/audience/${audienceId}/stream/${streamId}`
       );
     } catch (err: any) {
       setError(err.message || "Failed to save item");
@@ -332,10 +337,16 @@ export default function ItemForm() {
 
           <button
             type="button"
-            onClick={() => navigate(-1)}
+            onClick={() =>
+              navigate(
+                returnToDivisionManager
+                  ? `/admin/division/${divisionId}/manage`
+                  : -1
+              )
+            }
             className="px-6 py-3 bg-gray-300 rounded"
           >
-            Back
+            {returnToDivisionManager ? "Cancel" : "Back"}
           </button>
         </div>
       </form>

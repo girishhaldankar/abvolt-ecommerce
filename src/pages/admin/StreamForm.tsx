@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import * as Icons from "lucide-react";
 import { getDivisionById } from "../../services/divisions.service";
 import { addStream, updateStream } from "../../services/streams.service";
@@ -13,6 +13,9 @@ const LUCIDE_ICON_NAMES = Object.keys(Icons).filter(
 export default function StreamForm() {
   const { divisionId, audienceId, streamId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const returnToDivisionManager =
+    location.state?.returnToDivisionManager === true;
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -91,7 +94,11 @@ export default function StreamForm() {
         );
       }
 
-      navigate(`/admin/division/${divisionId}/audience/${audienceId}`);
+      navigate(
+        returnToDivisionManager
+          ? `/admin/division/${divisionId}/manage`
+          : `/admin/division/${divisionId}/audience/${audienceId}`
+      );
     } catch (err: any) {
       console.error(err);
       setError(err.message || "Failed to save stream");
@@ -226,13 +233,27 @@ export default function StreamForm() {
         </div>
 
         {/* SAVE BUTTON */}
-        <button
-          type="submit"
-          className="w-full rounded bg-blue-600 px-4 py-2 font-medium text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-gray-400"
-          disabled={isSaving}
-        >
-          {isSaving ? "Saving..." : "Save Stream"}
-        </button>
+        <div className="flex gap-3">
+          <button
+            type="submit"
+            className="flex-1 rounded bg-blue-600 px-4 py-2 font-medium text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-gray-400"
+            disabled={isSaving}
+          >
+            {isSaving ? "Saving..." : "Save Stream"}
+          </button>
+          {returnToDivisionManager && (
+            <button
+              type="button"
+              className="rounded bg-gray-300 px-4 py-2 font-medium hover:bg-gray-400 disabled:opacity-50"
+              disabled={isSaving}
+              onClick={() =>
+                navigate(`/admin/division/${divisionId}/manage`)
+              }
+            >
+              Cancel
+            </button>
+          )}
+        </div>
       </form>
     </div>
   );

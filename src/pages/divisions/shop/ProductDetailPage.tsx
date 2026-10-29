@@ -11,11 +11,13 @@ import { ImageFallback } from "../../../components/ImageFallback";
 import { Header } from "../../../components/Header";
 
 import { Footer } from "../../../components/Footer";
+import QuoteRequestModal from "../../../components/QuoteRequestModal";
 import GlowBackground from "../../../components/ui/GlowBackground";
 
 export default function ProductDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [quoteOpen, setQuoteOpen] = useState(false);
 
   const product = products.find((p) => p.id === Number(id));
   const [selectedImage, setSelectedImage] = useState(product?.image);
@@ -124,7 +126,7 @@ export default function ProductDetailPage() {
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
 
   <button
-    onClick={() => navigate(`/shop/request-quote/${product.id}`)}
+    onClick={() => setQuoteOpen(true)}
     className="px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-full text-lg hover:scale-105 transition w-full sm:w-auto"
   >
     Request Quote
@@ -181,6 +183,18 @@ export default function ProductDetailPage() {
           />
         </div>
       </div>
+
+      {quoteOpen && (
+        <QuoteRequestModal
+          item={{
+            itemSource: "shop",
+            itemId: String(product.id),
+            itemName: product.name,
+            itemCategory: product.category,
+          }}
+          onClose={() => setQuoteOpen(false)}
+        />
+      )}
 
       <Footer />
     </>

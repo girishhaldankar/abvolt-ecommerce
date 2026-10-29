@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import * as Icons from "lucide-react";
 import * as XLSX from "xlsx";
@@ -134,6 +134,8 @@ const Stat = ({
 export default function AdminDashboard() {
   const [divisions, setDivisions] = useState<Division[]>([]);
   const [loading, setLoading] = useState(true);
+  const [divisionLoadError, setDivisionLoadError] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [isExporting, setIsExporting] = useState(false);
   const [exportError, setExportError] = useState("");
   const [isPreviewingImport, setIsPreviewingImport] = useState(false);
@@ -143,7 +145,6 @@ export default function AdminDashboard() {
     useState<CategoryImportSession | null>(null);
   const [commitResult, setCommitResult] =
     useState<CategoryImportCommitResult | null>(null);
-  const navigate = useNavigate();
   const importInputRef = useRef<HTMLInputElement>(null);
   const commitInProgressRef = useRef(false);
 
@@ -156,6 +157,9 @@ export default function AdminDashboard() {
         setDivisions(data);
       } catch (err) {
         console.error("Error fetching divisions:", err);
+        setDivisionLoadError(
+          err instanceof Error ? err.message : "Failed to load divisions."
+        );
         
       } finally {
         setLoading(false);
@@ -441,37 +445,71 @@ export default function AdminDashboard() {
 
   /* Helper functions for totals */
   const countStreams = (audiences?: Audience[]) =>
-    audiences?.reduce((s, a) => s + (a.streams?.length || 0), 0) || 0;
+    audiences?.reduce(
+      (total, audience) =>
+        total +
+        (Array.isArray(audience.streams) ? audience.streams.length : 0),
+      0
+    ) || 0;
 
   const countCategories = (audiences?: Audience[]) =>
     audiences?.reduce(
-      (s, a) =>
-        s +
-        (a.streams || []).reduce(
-          (x, st) => x + (st.categories?.length || 0),
+      (total, audience) =>
+        total +
+        (Array.isArray(audience.streams) ? audience.streams : []).reduce(
+          (streamTotal, stream) =>
+            streamTotal +
+            (Array.isArray(stream.categories) ? stream.categories.length : 0),
           0
         ),
       0
     ) || 0;
 
+  const countItems = (audiences?: Audience[]) =>
+    audiences?.reduce(
+      (total, audience) =>
+        total +
+        (Array.isArray(audience.streams) ? audience.streams : []).reduce(
+          (streamTotal, stream) =>
+            streamTotal +
+            (Array.isArray(stream.categories) ? stream.categories : []).reduce(
+              (categoryTotal, category) =>
+                categoryTotal +
+                (Array.isArray(category.items) ? category.items.length : 0),
+              0
+            ),
+          0
+        ),
+      0
+    ) || 0;
+
+  const filteredDivisions = divisions.filter((division) => {
+    const query = searchQuery.trim().toLocaleLowerCase();
+    return (
+      !query ||
+      division.title?.toLocaleLowerCase().includes(query) ||
+      division.description?.toLocaleLowerCase().includes(query)
+    );
+  });
+
   return (
     <div className="flex min-h-screen bg-gray-100 text-gray-900">
       <AdminSidebar />
 
-      <div className="flex-1 p-8">
+      <div className="min-w-0 flex-1 p-4 sm:p-6 lg:p-8">
         {/* HEADER */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">Admin Dashboard</h1>
+        <div className="mb-6">
+          <h1 className="mb-2 text-3xl font-bold">Admin Dashboard</h1>
           <p className="text-gray-600">
-            Manage divisions, audiences, streams, and categories
+            Search and manage your divisions
           </p>
         </div>
 
         {/* DASHBOARD ACTIONS */}
-        <div className="mb-8 flex flex-wrap items-center gap-3">
+        <div className="mb-6 flex flex-wrap items-center gap-3">
           <Link
             to="/admin/division/new"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 shadow transition"
+            className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2.5 font-semibold text-white shadow transition hover:bg-green-700"
           >
             <Icons.Plus size={18} />
             Add New Division
@@ -480,7 +518,7 @@ export default function AdminDashboard() {
             type="button"
             onClick={handleExcelExport}
             disabled={isExporting}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 shadow transition disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 font-semibold text-white shadow transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
           >
             <Icons.Download size={18} />
             {isExporting ? "Preparing Excel..." : "Download Excel"}
@@ -496,7 +534,7 @@ export default function AdminDashboard() {
             type="button"
             onClick={() => importInputRef.current?.click()}
             disabled={isPreviewingImport || isCommittingImport}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 shadow transition disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 font-semibold text-white shadow transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
           >
             <Icons.Upload size={18} />
             {isPreviewingImport ? "Previewing Excel..." : "Upload Excel"}
@@ -603,158 +641,130 @@ export default function AdminDashboard() {
           </section>
         )}
 
-        {/* DIVISIONS GRID */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <section aria-labelledby="divisions-heading">
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h2 id="divisions-heading" className="text-xl font-semibold">
+                Divisions
+              </h2>
+              {!loading && !divisionLoadError && (
+                <p className="mt-1 text-sm text-gray-500">
+                  {filteredDivisions.length} of {divisions.length}{" "}
+                  {divisions.length === 1 ? "division" : "divisions"}
+                </p>
+              )}
+            </div>
+            <label className="relative block w-full sm:max-w-sm">
+              <Icons.Search
+                size={18}
+                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+              />
+              <input
+                type="search"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                placeholder="Search divisions by name or description"
+                aria-label="Search divisions by name or description"
+                className="w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-10 pr-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+              />
+            </label>
+          </div>
+
           {loading ? (
-            <div className="col-span-full flex justify-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600" />
+            <div className="flex justify-center rounded-lg border bg-white py-12">
+              <div
+                className="h-10 w-10 animate-spin rounded-full border-b-2 border-blue-600"
+                role="status"
+                aria-label="Loading divisions"
+              />
+            </div>
+          ) : divisionLoadError ? (
+            <div
+              className="rounded-lg border border-red-300 bg-red-50 p-4 text-sm text-red-800"
+              role="alert"
+            >
+              Unable to load divisions: {divisionLoadError}
             </div>
           ) : divisions.length === 0 ? (
-            <div className="col-span-full text-center py-12 bg-white rounded border">
-              No divisions found
+            <div className="rounded-lg border bg-white px-4 py-10 text-center text-gray-600">
+              No divisions found. Add a division to get started.
+            </div>
+          ) : filteredDivisions.length === 0 ? (
+            <div className="rounded-lg border bg-white px-4 py-10 text-center text-gray-600">
+              No divisions match “{searchQuery.trim()}”.
             </div>
           ) : (
-            divisions.map((division) => (
-              <div
-                key={division.id}
-                className="bg-white rounded-lg shadow border hover:shadow-lg transition"
-              >
-                <div className="p-6">
-                  {/* DIVISION HEADER */}
-                  <h3 className="text-2xl font-bold mb-2 flex items-center gap-3">
-                    <RenderIcon
-                      name={division.icon}
-                      size={26}
-                      fallback="Building2"
-                    />
-                    {division.title}
-                  </h3>
-                  {division.description && (
-                    <p className="text-gray-600 text-sm mb-4">
-                      {division.description}
-                    </p>
-                  )}
+            <div className="space-y-3">
+              {filteredDivisions.map((division) => {
+                const divisionId = getRecordId(division);
+                const audiences = Array.isArray(division.audiences)
+                  ? division.audiences
+                  : [];
+                const counts = [
+                  { label: "Audiences", value: audiences.length },
+                  { label: "Streams", value: countStreams(audiences) },
+                  { label: "Categories", value: countCategories(audiences) },
+                  { label: "Items", value: countItems(audiences) },
+                ];
 
-                  {/* STATS */}
-                  <div className="grid grid-cols-3 gap-3 mb-6 pb-6 border-b">
-                    <Stat
-                      label="Audiences"
-                      value={division.audiences?.length || 0}
-                      color="text-blue-600"
-                    />
-                    <Stat
-                      label="Streams"
-                      value={countStreams(division.audiences)}
-                      color="text-purple-600"
-                    />
-                    <Stat
-                      label="Categories"
-                      value={countCategories(division.audiences)}
-                      color="text-green-600"
-                    />
-                  </div>
-
-                  {/* AUDIENCES */}
-                  {division.audiences?.length > 0 && (
-                    <div className="space-y-4 max-h-96 overflow-y-auto bg-gray-50 p-4 rounded border">
-                      {division.audiences.map((audience) => (
-                        <div
-                          key={audience.id}
-                          className="border-l-4 border-blue-500 pl-4"
-                        >
-                          <div className="flex justify-between items-center mb-2">
-                            <p className="font-medium flex items-center gap-2 text-gray-700">
-                              <RenderIcon
-                                name={audience.icon}
-                                size={18}
-                                fallback="Users"
-                              />
-                              {audience.title}
+                return (
+                  <article
+                    key={divisionId || division.title}
+                    className="rounded-lg border bg-white p-4 shadow-sm transition hover:border-gray-300 hover:shadow sm:p-5"
+                  >
+                    <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                      <div className="flex min-w-0 items-start gap-3">
+                        <span className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-700">
+                          <RenderIcon
+                            name={division.icon}
+                            size={20}
+                            fallback="Building2"
+                          />
+                        </span>
+                        <div className="min-w-0">
+                          <h3 className="truncate text-lg font-semibold">
+                            {division.title || "Untitled Division"}
+                          </h3>
+                          {division.description && (
+                            <p className="mt-1 line-clamp-2 text-sm text-gray-600">
+                              {division.description}
                             </p>
-                            <Link
-                              to={`/admin/division/${division.id}/audience/${audience.id}`}
-                              className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
-                            >
-                              Manage
-                            </Link>
-                          </div>
-
-                          {/* STREAMS */}
-                          {audience.streams?.map((stream) => (
-                            <div
-                              key={stream.id}
-                              className="ml-3 mb-2 p-2 rounded border bg-white"
-                            >
-                              <div className="flex justify-between items-center">
-                                <p className="text-xs font-semibold flex items-center gap-2 text-gray-700">
-                                  <RenderIcon
-                                    name={stream.icon}
-                                    size={14}
-                                    fallback="Folder"
-                                  />
-                                  {stream.title}
-                                </p>
-                                <Link
-                                  to={`/admin/division/${division.id}/audience/${audience.id}/stream/${stream.id}`}
-                                  className="text-xs bg-blue-600 text-white px-2 py-0.5 rounded hover:bg-blue-700"
-                                >
-                                  Edit
-                                </Link>
-                              </div>
-
-                              {/* CATEGORIES */}
-                              {stream.categories?.map((category) => (
-                                <div
-                                  key={category.id}
-                                  className="ml-4 bg-gray-50 p-2 rounded border mt-1"
-                                >
-                                  <div className="flex justify-between items-center">
-                                    <p className="text-xs flex items-center gap-2 text-gray-700">
-                                      <RenderIcon
-                                        name={category.icon}
-                                        size={14}
-                                        fallback="Folder"
-                                      />
-                                      {category.title}
-                                    </p>
-                                    <Link
-                                      to={`/admin/division/${division.id}/audience/${audience.id}/stream/${stream.id}/category/${category.id}`}
-                                      className="text-xs bg-blue-600 text-white px-2 py-0.5 rounded hover:bg-blue-700"
-                                    >
-                                      Edit
-                                    </Link>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          ))}
+                          )}
                         </div>
-                      ))}
-                    </div>
-                  )}
+                      </div>
 
-                  {/* ACTIONS */}
-                  <div className="flex gap-3 mt-6">
-                    <button
-                      onClick={() => navigate(`/admin/division/${division.id}`)}
-                      className="flex-1 bg-gray-700 text-white py-2 rounded hover:bg-gray-800"
-                    >
-                      Edit Division
-                    </button>
-                    <button
-                      onClick={() =>
-                        navigate(`/admin/division/${division.id}/audience/new`)
-                      }
-                      className="flex-1 bg-green-600 text-white py-2 rounded hover:bg-green-700"
-                    >
-                      Add Audience
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))
+                      <div className="grid grid-cols-2 gap-x-5 gap-y-2 sm:grid-cols-4 lg:min-w-[22rem]">
+                        {counts.map(({ label, value }) => (
+                          <div key={label} className="flex items-baseline gap-2">
+                            <span className="text-lg font-semibold text-gray-900">
+                              {value}
+                            </span>
+                            <span className="text-xs text-gray-500">{label}</span>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="flex shrink-0 flex-wrap gap-2">
+                        <Link
+                          to={`/admin/division/${divisionId}/manage`}
+                          className="inline-flex items-center justify-center rounded bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                        >
+                          Manage Division
+                        </Link>
+                        <Link
+                          to={`/admin/division/${divisionId}`}
+                          className="inline-flex items-center justify-center rounded border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                        >
+                          Edit Division
+                        </Link>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
           )}
-        </div>
+        </section>
       </div>
     </div>
   );
