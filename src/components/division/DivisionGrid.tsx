@@ -79,31 +79,39 @@ export default function DivisionGrid() {
           </div>
         )}
 
-        {/* Divisions Grid */}
-        {!loading && divisions.length > 0 && (
-          <motion.div
-            className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: false }}
-          >
-            {divisions.map((division) => {
-              const color = division.color || "gray";
+       
+{/* Divisions Grid */}
+{!loading && divisions.length > 0 && (
+  <motion.div
+    className="flex flex-wrap justify-center gap-4 sm:gap-6"
+    variants={containerVariants}
+    initial="hidden"
+    whileInView="visible"
+    viewport={{ once: false }}
+  >
+    {divisions.map((division) => {
+      const color = division.color || "gray";
 
-              return (
-                <motion.div
-                  key={division._id || division.id}
-                  variants={itemVariants}
-                  transition={{ duration: 0.5, ease: "easeOut" }}
-                  className="w-full"
-                >
-                  <DivisionCard division={{ ...division, color }} />
-                </motion.div>
-              );
-            })}
-          </motion.div>
-        )}
+      return (
+        <motion.div
+          key={division._id || division.id}
+          variants={itemVariants}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          className="
+            w-full
+            sm:w-[calc((100%-1.5rem)/2)]
+            md:w-[calc((100%-3rem)/3)]
+            lg:w-[calc((100%-4.5rem)/4)]
+            xl:w-[calc((100%-6rem)/5)]
+          "
+        >
+          <DivisionCard division={{ ...division, color }} />
+        </motion.div>
+      );
+    })}
+  </motion.div>
+)}
+
       </div>
     </section>
   );
